@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29009.5
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Habitica", "Habitica\Habitica.csproj", "{AEAED3AC-AC90-4643-8CA5-DC008E438A8B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AEAED3AC-AC90-4643-8CA5-DC008E438A8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEAED3AC-AC90-4643-8CA5-DC008E438A8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEAED3AC-AC90-4643-8CA5-DC008E438A8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEAED3AC-AC90-4643-8CA5-DC008E438A8B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {637F49E4-7327-4BC7-B8B8-B1FD7CDD0F07}
+	EndGlobalSection
+EndGlobal
