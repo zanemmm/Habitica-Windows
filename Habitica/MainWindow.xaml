@@ -23,21 +23,20 @@
                         <RowDefinition Height="40"></RowDefinition>
                     </Grid.RowDefinitions>
                     <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Hidden" PanningMode="VerticalOnly">
-                        <StackPanel x:Name="TodayTargetsList">
-                            <Habitica:SimpleTaskCard Text="步行 8000 步"  Deadline="2019/06/17" IsShowDeadline="False"  OverdueColor="Red" FinishColor="LightGray" ProcessColor="#CC6459DF" RenderTransformOrigin="0.5,0.5"/>
-                            <local:SimpleTaskCard Text="步行 8000 步"  Deadline="2019/06/17"/>
-                            <Habitica:SimpleTaskCard Text="大学生英语四级考试复习" FinishColor="LightGray" ProcessColor="#CC6459DF"/>
-                            <Habitica:SimpleTaskCard Text="大学生英语四级考试复习"/>
-                            <Habitica:SimpleTaskCard Text="大学生英语四级考试复习"/>
+                        <StackPanel x:Name="todayTargetsList">
+                            <Habitica:SimpleTaskCard Title="步行 8000 步"  Deadline="2019/06/17" IsShowDeadline="False"  OverdueColor="Red" FinishColor="LightGray" ProcessColor="#CC6459DF" RenderTransformOrigin="0.5,0.5"/>
+                            <Habitica:SimpleTaskCard Title="大学生英语四级考试复习" FinishColor="LightGray" ProcessColor="#CC6459DF"/>
+                            <Habitica:SimpleTaskCard Title="大学生英语四级考试复习"/>
+                            <Habitica:SimpleTaskCard Title="大学生英语四级考试复习"/>
                         </StackPanel>
                     </ScrollViewer>
-                    <Grid Grid.Row="1" Margin="0 5 0 0 ">
+                    <Grid Grid.Row="1" Margin="0 5 0 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"></ColumnDefinition>
                             <!--<ColumnDefinition Width="25.6"></ColumnDefinition>-->
                             <ColumnDefinition Width="80"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <TextBox Margin="5 0 0 0" Grid.Column="0"  VerticalContentAlignment="Center" FontSize="16"></TextBox>
+                        <TextBox x:Name="newTodayTargetName" Margin="5 0 0 0" Grid.Column="0"  VerticalContentAlignment="Center" FontSize="16"></TextBox>
                         <!--<DatePicker Grid.Column="1" VerticalAlignment="Stretch" ToolTip="截至日期">
                             <DatePicker.Resources>
                                 <Style TargetType="DatePickerTextBox">
@@ -45,7 +44,7 @@
                                 </Style>
                             </DatePicker.Resources>
                         </DatePicker>-->
-                        <Button x:Name="AddTodyTargetButton" Click="AddTodyTargetButton_Click" Grid.Column="2" Margin="0 0 5 0" VerticalAlignment="Stretch" Style="{StaticResource AccentedSquareButtonStyle}" FontSize="16" Cursor="Hand">新增</Button>
+                        <Button x:Name="addTodayTargetButton" Click="AddNewTodayTarget" Grid.Column="2" Margin="0 0 5 0" VerticalAlignment="Stretch" Style="{StaticResource AccentedSquareButtonStyle}" FontSize="16" Cursor="Hand">新增</Button>
                     </Grid>
                 </Grid>
             </TabItem>

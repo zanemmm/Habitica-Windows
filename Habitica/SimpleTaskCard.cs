@@ -39,13 +39,23 @@ namespace Habitica
     public class SimpleTaskCard : Control
 
     {
+        // 子控件
         private Image taskCheckbox;
         private Border taskCheckboxBorder;
         private TextBlock taskNameBlock;
         private TextBlock taskDeadliineBlock;
 
+        // 勾选框图片资源
         private static readonly BitmapImage blankImage = new BitmapImage(new Uri("Resources/check-box-outline-blank.png", UriKind.Relative));
         private static readonly BitmapImage fullImage = new BitmapImage(new Uri("Resources/check-box-outline.png", UriKind.Relative));
+
+        // 任务状态类型
+        public enum Status
+        {
+            Process,
+            Finish,
+            Overdue
+        }
 
         static SimpleTaskCard()
         {
@@ -60,7 +70,7 @@ namespace Habitica
             taskCheckboxBorder = GetTemplateChild("TaskCheckboxBorder") as Border;
             taskNameBlock = GetTemplateChild("taskNameBlock") as TextBlock;
             taskDeadliineBlock = GetTemplateChild("taskDeadliineBlock") as TextBlock;
-            // 附加事件
+            // 勾选框附加事件
             taskCheckbox.MouseLeftButtonUp += Checkbox_Click;
             // 状态初始化
             CheckDeadline();
@@ -94,13 +104,13 @@ namespace Habitica
             set => SetValue(IsShowDeadlineProperty, value);
         }
 
-        public static readonly DependencyProperty TextProperty = DependencyProperty.Register("Text", typeof(string), typeof(SimpleTaskCard), new PropertyMetadata(System.String.Empty));
+        public static readonly DependencyProperty TitleProperty = DependencyProperty.Register("Title", typeof(string), typeof(SimpleTaskCard), new PropertyMetadata(System.String.Empty));
         [Bindable(true)]
         [Category("Appearance")]
-        public string Text
+        public string Title
         {
-            get => (string)GetValue(TextProperty);
-            set => SetValue(TextProperty, value);
+            get => (string)GetValue(TitleProperty);
+            set => SetValue(TitleProperty, value);
         }
 
         public static readonly DependencyProperty ProcessColorProperty = DependencyProperty.Register("ProcessColor", typeof(Brush), typeof(SimpleTaskCard), new PropertyMetadata(new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CC6459DF"))));
@@ -151,32 +161,40 @@ namespace Habitica
             IsOverdue = true;
         }
 
-        private void CheckStatus()
+        private Status CheckStatus()
         {
             if (IsFinsh)
             {
                 taskCheckbox.Source = fullImage;
                 taskCheckboxBorder.Background = FinishColor;
                 taskNameBlock.Foreground = FinishColor;
+                return Status.Finish;
             }
             else if (IsOverdue)
             {
                 taskCheckbox.Source = blankImage;
                 taskCheckboxBorder.Background = OverdueColor;
                 taskNameBlock.Foreground = OverdueColor;
+                return Status.Overdue;
             }
             else
             {
                 taskCheckbox.Source = blankImage;
                 taskCheckboxBorder.Background = ProcessColor;
                 taskNameBlock.Foreground = ProcessColor;
+                return Status.Process;
             }
         }
+
+
+        public event EventHandler<Status> StatusChange;
 
         private void Checkbox_Click(object sender, RoutedEventArgs e)
         {
             IsFinsh = !IsFinsh;
-            CheckStatus();
+            Status status = CheckStatus();
+            // 触发 StatusChangeEvent 事件
+            StatusChange?.Invoke(this, status);
         }
     }
 }

@@ -65,5 +65,17 @@ namespace Habitica
             //p.Children[0].RenderTransform.BeginAnimation(TranslateTransform.XProperty, a);
             //a.Children.RemoveAt(0);
         }
+
+        private void AddNewTodayTarget(object sender, RoutedEventArgs e)
+        {
+            SimpleTaskCard card = new SimpleTaskCard
+            {
+                Title = newTodayTargetName.Text,
+                Deadline = DateTime.Now.Date,
+                IsShowDeadline = false
+            };
+            todayTargetsList.Children.Add(card);
+            newTodayTargetName.Text = "";
+        }
     }
 }
