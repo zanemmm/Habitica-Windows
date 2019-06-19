@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         ShowInTaskbar="False"
         Title="Habitica" 
-        Height="420" 
+        Height="475" 
         Width="360"
         WindowStartupLocation="CenterScreen" 
         ResizeMode="NoResize" 
@@ -17,24 +17,45 @@
     <Grid>
         <Controls:MetroAnimatedSingleRowTabControl Padding="0" TabStripPlacement="Bottom" Controls:ScrollViewerHelper.IsHorizontalScrollWheelEnabled="False">
             <TabItem Padding="15 5" Margin="0" Header="今天" IsSelected="True">
-                <ScrollViewer VerticalScrollBarVisibility="Hidden" PanningMode="VerticalOnly">
-                    <StackPanel Margin="0 30"  x:Name="Today_Targets_List">
-                        <Habitica:SimpleTaskCard Text="步行 8000 步" IsFinsh="True" FinishColor="LightGray" ProcessColor="#CC6459DF"/>
-                        <Habitica:SimpleTaskCard Text="大学生英语四级考试复习" FinishColor="LightGray" ProcessColor="#CC6459DF"/>
-                        <Controls:Tile Width="Auto" Height="100" Count="Hello" />
-                        <Controls:Tile Width="Auto" Height="100" Count="Hello" />
-                        <Controls:Tile Width="Auto" Height="100" Count="Hello" Click="Tile_Click" />
-                        <Controls:Tile Width="Auto" Height="100" Count="Hello" />
-                    </StackPanel>
-                </ScrollViewer>
-            </TabItem>
-            <TabItem Padding="15 5" Margin="0" Header="习惯">
-                
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="40"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Hidden" PanningMode="VerticalOnly">
+                        <StackPanel x:Name="TodayTargetsList">
+                            <Habitica:SimpleTaskCard Text="步行 8000 步"  Deadline="2019/06/17" IsShowDeadline="False"  OverdueColor="Red" FinishColor="LightGray" ProcessColor="#CC6459DF" RenderTransformOrigin="0.5,0.5"/>
+                            <local:SimpleTaskCard Text="步行 8000 步"  Deadline="2019/06/17"/>
+                            <Habitica:SimpleTaskCard Text="大学生英语四级考试复习" FinishColor="LightGray" ProcessColor="#CC6459DF"/>
+                            <Habitica:SimpleTaskCard Text="大学生英语四级考试复习"/>
+                            <Habitica:SimpleTaskCard Text="大学生英语四级考试复习"/>
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Grid Grid.Row="1" Margin="0 5 0 0 ">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <!--<ColumnDefinition Width="25.6"></ColumnDefinition>-->
+                            <ColumnDefinition Width="80"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBox Margin="5 0 0 0" Grid.Column="0"  VerticalContentAlignment="Center" FontSize="16"></TextBox>
+                        <!--<DatePicker Grid.Column="1" VerticalAlignment="Stretch" ToolTip="截至日期">
+                            <DatePicker.Resources>
+                                <Style TargetType="DatePickerTextBox">
+                                    <Setter Property="Visibility" Value="Hidden"/>
+                                </Style>
+                            </DatePicker.Resources>
+                        </DatePicker>-->
+                        <Button x:Name="AddTodyTargetButton" Click="AddTodyTargetButton_Click" Grid.Column="2" Margin="0 0 5 0" VerticalAlignment="Stretch" Style="{StaticResource AccentedSquareButtonStyle}" FontSize="16" Cursor="Hand">新增</Button>
+                    </Grid>
+                </Grid>
             </TabItem>
             <TabItem Padding="15 5" Margin="0" Header="日常">
+                
+            </TabItem>
+            <TabItem Padding="15 5" Margin="0" Header="目标">
 
             </TabItem>
-            <TabItem Padding="15 5" Margin="0" Header="计划">
+            <TabItem Padding="15 5" Margin="0" Header="设置">
 
             </TabItem>
         </Controls:MetroAnimatedSingleRowTabControl>

@@ -24,10 +24,24 @@
                                 <Image Width="48" Height="48" x:Name="TasKCheckbox"/>
                             </Border>
                             <Border Grid.Row="0" Grid.Column="1" CornerRadius="0 8 8 0" Background="White">
-                                <TextBlock x:Name="taskNameBlock" Text="{TemplateBinding Text}" TextAlignment="Center" VerticalAlignment="Center" FontSize="20"/>
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="taskNameBlock" Padding="15 0 0 0" Text="{TemplateBinding Text}" FontSize="20"/>
+                                    <TextBlock x:Name="taskDeadliineBlock" Padding="15 10 0 0" FontSize="14" Foreground="{TemplateBinding FinishColor}"></TextBlock>
+                                </StackPanel>
                             </Border>
                         </Grid>
                     </Border>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsShowDeadline" Value="True">
+                            <Setter TargetName="taskDeadliineBlock" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsShowDeadline" Value="False">
+                            <Setter TargetName="taskDeadliineBlock" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                        <Trigger Property="Deadline" Value="0001/01/01">
+                            <Setter TargetName="taskDeadliineBlock" Property="Visibility" Value="Collapsed"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
         </Setter>

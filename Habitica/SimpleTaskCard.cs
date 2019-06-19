@@ -42,9 +42,10 @@ namespace Habitica
         private Image taskCheckbox;
         private Border taskCheckboxBorder;
         private TextBlock taskNameBlock;
+        private TextBlock taskDeadliineBlock;
 
-        private static BitmapImage blankImage = new BitmapImage(new Uri("Resources/check-box-outline-blank.png", UriKind.Relative));
-        private static BitmapImage fullImage = new BitmapImage(new Uri("Resources/check-box-outline.png", UriKind.Relative));
+        private static readonly BitmapImage blankImage = new BitmapImage(new Uri("Resources/check-box-outline-blank.png", UriKind.Relative));
+        private static readonly BitmapImage fullImage = new BitmapImage(new Uri("Resources/check-box-outline.png", UriKind.Relative));
 
         static SimpleTaskCard()
         {
@@ -54,11 +55,16 @@ namespace Habitica
         public override void OnApplyTemplate()
         {
             base.OnApplyTemplate();
+            // 获取子控件实例
             taskCheckbox = GetTemplateChild("TasKCheckbox") as Image;
             taskCheckboxBorder = GetTemplateChild("TaskCheckboxBorder") as Border;
             taskNameBlock = GetTemplateChild("taskNameBlock") as TextBlock;
+            taskDeadliineBlock = GetTemplateChild("taskDeadliineBlock") as TextBlock;
+            // 附加事件
             taskCheckbox.MouseLeftButtonUp += Checkbox_Click;
-            IsFinsh_Changed();
+            // 状态初始化
+            CheckDeadline();
+            CheckStatus();
         }
 
         public static readonly DependencyProperty IsFinshProperty = DependencyProperty.Register("IsFinsh", typeof(bool), typeof(SimpleTaskCard), new PropertyMetadata(false));
@@ -70,6 +76,24 @@ namespace Habitica
             set => SetValue(IsFinshProperty, value);
         }
 
+        public static readonly DependencyProperty IsOverdueProperty = DependencyProperty.Register("IsOverdue", typeof(bool), typeof(SimpleTaskCard), new PropertyMetadata(false));
+        [Bindable(true)]
+        [Category("Appearance")]
+        public bool IsOverdue
+        {
+            get => (bool)GetValue(IsOverdueProperty);
+            set => SetValue(IsOverdueProperty, value);
+        }
+
+        public static readonly DependencyProperty IsShowDeadlineProperty = DependencyProperty.Register("IsShowDeadline", typeof(bool), typeof(SimpleTaskCard), new PropertyMetadata(true));
+        [Bindable(true)]
+        [Category("Appearance")]
+        public bool IsShowDeadline
+        {
+            get => (bool)GetValue(IsShowDeadlineProperty);
+            set => SetValue(IsShowDeadlineProperty, value);
+        }
+
         public static readonly DependencyProperty TextProperty = DependencyProperty.Register("Text", typeof(string), typeof(SimpleTaskCard), new PropertyMetadata(System.String.Empty));
         [Bindable(true)]
         [Category("Appearance")]
@@ -79,7 +103,7 @@ namespace Habitica
             set => SetValue(TextProperty, value);
         }
 
-        public static readonly DependencyProperty ProcessColorProperty = DependencyProperty.Register("ProcessColor", typeof(Brush), typeof(SimpleTaskCard), new PropertyMetadata(null));
+        public static readonly DependencyProperty ProcessColorProperty = DependencyProperty.Register("ProcessColor", typeof(Brush), typeof(SimpleTaskCard), new PropertyMetadata(new SolidColorBrush((Color)ColorConverter.ConvertFromString("#CC6459DF"))));
         [Bindable(true)]
         [Category("Appearance")]
         public Brush ProcessColor
@@ -88,7 +112,7 @@ namespace Habitica
             set => SetValue(ProcessColorProperty, value);
         }
 
-        public static readonly DependencyProperty FinishColorProperty = DependencyProperty.Register("FinishColor", typeof(Brush), typeof(SimpleTaskCard), new PropertyMetadata(null));
+        public static readonly DependencyProperty FinishColorProperty = DependencyProperty.Register("FinishColor", typeof(Brush), typeof(SimpleTaskCard), new PropertyMetadata(new SolidColorBrush((Color)ColorConverter.ConvertFromString("#BBBBBB"))));
         [Bindable(true)]
         [Category("Appearance")]
         public Brush FinishColor
@@ -97,14 +121,49 @@ namespace Habitica
             set => SetValue(FinishColorProperty, value);
         }
 
+        public static readonly DependencyProperty OverdueColorProperty = DependencyProperty.Register("OverdueColor", typeof(Brush), typeof(SimpleTaskCard), new PropertyMetadata(new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FFC107"))));
+        [Bindable(true)]
+        [Category("Appearance")]
+        public Brush OverdueColor
+        {
+            get => (Brush)GetValue(OverdueColorProperty);
+            set => SetValue(OverdueColorProperty, value);
+        }
 
-        private void IsFinsh_Changed()
+        public static readonly DependencyProperty DeadlineProperty = DependencyProperty.Register("Deadline", typeof(DateTime), typeof(SimpleTaskCard), new PropertyMetadata(null));
+        [Bindable(true)]
+        [Category("Appearance")]
+        public DateTime Deadline
+        {
+            get => (DateTime)GetValue(DeadlineProperty);
+            set => SetValue(DeadlineProperty, value);
+        }
+
+        private void CheckDeadline()
+        {
+            // 没有设置 Deadline 或 DeadLine 未至
+            if (Deadline == null || Deadline == DateTime.MinValue || Deadline.Date >= DateTime.Now.Date)
+            {
+                IsOverdue = false;
+                return;
+            }
+            taskDeadliineBlock.Text = Deadline.ToShortDateString();
+            IsOverdue = true;
+        }
+
+        private void CheckStatus()
         {
             if (IsFinsh)
             {
                 taskCheckbox.Source = fullImage;
                 taskCheckboxBorder.Background = FinishColor;
                 taskNameBlock.Foreground = FinishColor;
+            }
+            else if (IsOverdue)
+            {
+                taskCheckbox.Source = blankImage;
+                taskCheckboxBorder.Background = OverdueColor;
+                taskNameBlock.Foreground = OverdueColor;
             }
             else
             {
@@ -117,7 +176,7 @@ namespace Habitica
         private void Checkbox_Click(object sender, RoutedEventArgs e)
         {
             IsFinsh = !IsFinsh;
-            IsFinsh_Changed();
+            CheckStatus();
         }
     }
 }

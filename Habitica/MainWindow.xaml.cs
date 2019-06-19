@@ -11,6 +11,7 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
@@ -29,6 +30,7 @@ namespace Habitica
         private static extern IntPtr FindWindowEx(IntPtr hWnd1, IntPtr hWnd2, string lpsz1, string lpsz2);
         [DllImport("user32.dll")]
         public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+
         public MainWindow()
         {
             InitializeComponent();
@@ -36,17 +38,32 @@ namespace Habitica
 
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            // 窗口嵌入桌面
-            IntPtr hWnd = new WindowInteropHelper(Application.Current.MainWindow).Handle;
-            IntPtr pWnd = FindWindow("Progman", null);
-            pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SHELLDLL_DefVIew", null);
-            pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SysListView32", null);
-            SetParent(hWnd, pWnd);
+            //// 窗口嵌入桌面
+            //IntPtr hWnd = new WindowInteropHelper(Application.Current.MainWindow).Handle;
+            //IntPtr pWnd = FindWindow("Progman", null);
+            //pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SHELLDLL_DefVIew", null);
+            //pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SysListView32", null);
+            //SetParent(hWnd, pWnd);
         }
 
         private void Tile_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+
+        private void AddTodyTargetButton_Click(object sender, RoutedEventArgs e)
+        {
+            //StackPanel p = FindName("TodayTargetsList") as StackPanel;
+            //DoubleAnimation a = new DoubleAnimation
+            //{
+            //    From = 0,
+            //    To = -Width,
+            //    Duration = new Duration(TimeSpan.FromSeconds(.5))
+            //};
+            //TranslateTransform t = new TranslateTransform(0, 0);
+            //p.Children[0].RenderTransform = t;
+            //p.Children[0].RenderTransform.BeginAnimation(TranslateTransform.XProperty, a);
+            //a.Children.RemoveAt(0);
         }
     }
 }
