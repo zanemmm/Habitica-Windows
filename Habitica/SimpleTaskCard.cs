@@ -1,8 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 
 namespace Habitica
@@ -40,6 +43,7 @@ namespace Habitica
 
     {
         // 子控件
+        private Border taskCard;
         private Image taskCheckbox;
         private Border taskCheckboxBorder;
         private TextBlock taskNameBlock;
@@ -48,6 +52,9 @@ namespace Habitica
         // 勾选框图片资源
         private static readonly BitmapImage blankImage = new BitmapImage(new Uri("Resources/check-box-outline-blank.png", UriKind.Relative));
         private static readonly BitmapImage fullImage = new BitmapImage(new Uri("Resources/check-box-outline.png", UriKind.Relative));
+        
+        // 卡片位移
+        private TranslateTransform moveTranslateTransform = new TranslateTransform(0, 0);
 
         // 任务状态类型
         public enum Status
@@ -66,12 +73,29 @@ namespace Habitica
         {
             base.OnApplyTemplate();
             // 获取子控件实例
+            taskCard = GetTemplateChild("taskCard") as Border;
             taskCheckbox = GetTemplateChild("TasKCheckbox") as Image;
             taskCheckboxBorder = GetTemplateChild("TaskCheckboxBorder") as Border;
             taskNameBlock = GetTemplateChild("taskNameBlock") as TextBlock;
             taskDeadliineBlock = GetTemplateChild("taskDeadliineBlock") as TextBlock;
-            // 勾选框附加事件
+
+            // 勾选框附加点击事件
             taskCheckbox.MouseLeftButtonUp += Checkbox_Click;
+            // 卡片附加左移事件
+            // 鼠标左移
+            taskCard.MouseLeftButtonDown += TaskCard_MouseLeftButtonDown;
+            taskCard.MouseLeftButtonUp += TaskCard_MouseLeftButtonUp;
+            taskCard.MouseLeave += TaskCard_MouseLeave;
+            taskCard.MouseMove += TaskCard_MouseMove;
+            // 触摸左移
+            taskCard.IsManipulationEnabled = true; // IsManipulationEnabled 为 true 时 TouchMove 事件才会生效
+            taskCard.TouchDown += TaskCard_TouchDown;
+            taskCard.TouchUp += TaskCard_TouchUp;
+            taskCard.TouchLeave += TaskCard_TouchLeave;
+            taskCard.TouchMove += TaskCard_TouchMove;
+
+
+            RenderTransform = moveTranslateTransform;
             // 状态初始化
             CheckDeadline();
             CheckStatus();
@@ -189,12 +213,112 @@ namespace Habitica
 
         public event EventHandler<Status> StatusChange;
 
-        private void Checkbox_Click(object sender, RoutedEventArgs e)
+        public void TriggerStatusChange()
         {
-            IsFinsh = !IsFinsh;
             Status status = CheckStatus();
             // 触发 StatusChangeEvent 事件
             StatusChange?.Invoke(this, status);
+        }
+
+        private void Checkbox_Click(object sender, RoutedEventArgs e)
+        {
+            IsFinsh = !IsFinsh;
+            TriggerStatusChange();
+        }
+
+        // 卡片左滑移除功能
+        public event EventHandler<SimpleTaskCard> CardRemove;
+        private bool isMouseDown = false;
+        private Point mouseDownPoint;
+        private void TaskCard_MouseLeftButtonDown(object sender, RoutedEventArgs e)
+        {
+            isMouseDown = true;
+            mouseDownPoint = Mouse.GetPosition(Application.Current.MainWindow);
+            moveTranslateTransform.X = 0;
+        }
+
+        private void TaskCard_MouseLeftButtonUp(object sender, RoutedEventArgs e)
+        {
+            isMouseDown = false;
+            if (moveTranslateTransform.X + ActualWidth * 0.35  < 0)
+            {
+                DoubleAnimation animation = new DoubleAnimation
+                {
+                    From = moveTranslateTransform.X,
+                    To = -ActualWidth,
+                    Duration = new Duration(TimeSpan.FromSeconds(.2))
+                };
+                animation.Completed += new EventHandler((object a, EventArgs b) => { Visibility = Visibility.Collapsed; CardRemove?.Invoke(this, this); });
+                moveTranslateTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+            }
+            else
+            {
+                moveTranslateTransform.X = 0;
+            }
+        }
+
+        private void TaskCard_MouseLeave(object sender, RoutedEventArgs e)
+        {
+            isMouseDown = false;
+            moveTranslateTransform.X = 0;
+        }
+
+        private void TaskCard_MouseMove(object sender, RoutedEventArgs e)
+        {
+            if (isMouseDown == false)
+            {
+                return;
+            }
+            Point movePoint = Mouse.GetPosition(Application.Current.MainWindow);
+            if (movePoint.X > mouseDownPoint.X)
+            {
+                return;
+            }
+            moveTranslateTransform.X = movePoint.X - mouseDownPoint.X;
+        }
+
+
+        private TouchPoint touchDownPoint;
+        private void TaskCard_TouchDown(object sender, TouchEventArgs e)
+        {
+            touchDownPoint = e.GetTouchPoint(Application.Current.MainWindow);
+        }
+
+        private void TaskCard_TouchUp(object sender, TouchEventArgs e)
+        {
+            if (moveTranslateTransform.X + ActualWidth * 0.35 < 0)
+            {
+                DoubleAnimation animation = new DoubleAnimation
+                {
+                    From = moveTranslateTransform.X,
+                    To = -ActualWidth,
+                    Duration = new Duration(TimeSpan.FromSeconds(.2))
+                };
+                animation.Completed += new EventHandler((object a, EventArgs b) => { Visibility = Visibility.Collapsed; CardRemove?.Invoke(this, this); });
+                moveTranslateTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+            }
+            else
+            {
+                moveTranslateTransform.X = 0;
+            }
+        }
+
+        private void TaskCard_TouchLeave(object sender, RoutedEventArgs e)
+        {
+            if (Visibility != Visibility.Collapsed)
+            {
+                moveTranslateTransform.X = 0;
+            }
+        }
+
+        private void TaskCard_TouchMove(object sender, TouchEventArgs e)
+        {
+            TouchPoint movePoint = e.GetTouchPoint(Application.Current.MainWindow);
+            if (movePoint.Position.X > touchDownPoint.Position.X)
+            {
+                return;
+            }
+            moveTranslateTransform.X = movePoint.Position.X - touchDownPoint.Position.X;
         }
     }
 }

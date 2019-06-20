@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -68,14 +69,25 @@ namespace Habitica
 
         private void AddNewTodayTarget(object sender, RoutedEventArgs e)
         {
+            if (newTodayTargetName.Text == "")
+            {
+                return;
+            }
             SimpleTaskCard card = new SimpleTaskCard
             {
                 Title = newTodayTargetName.Text,
                 Deadline = DateTime.Now.Date,
-                IsShowDeadline = false
+                IsShowDeadline = false,
             };
+            card.CardRemove += TodayTargetRemoved;
             todayTargetsList.Children.Add(card);
+            todayTargetsListScroll.ScrollToBottom();
             newTodayTargetName.Text = "";
+        }
+
+        private void TodayTargetRemoved(object sender, SimpleTaskCard e)
+        {
+            todayTargetsList.Children.Remove(e);
         }
     }
 }
