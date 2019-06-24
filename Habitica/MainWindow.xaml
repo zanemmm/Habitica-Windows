@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         ShowInTaskbar="False"
         Title="Habitica" 
-        Height="475" 
+        Height="386" 
         Width="360"
         WindowStartupLocation="CenterScreen" 
         ResizeMode="NoResize" 
@@ -24,7 +24,7 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer x:Name="todayTargetsListScroll" Grid.Row="0" VerticalScrollBarVisibility="Hidden" PanningMode="VerticalOnly">
                         <StackPanel x:Name="todayTargetsList">
-                            <Habitica:SimpleTaskCard Title="步行 8000 步"  Deadline="2019/06/27" IsShowDeadline="False"  OverdueColor="Red" FinishColor="LightGray" ProcessColor="#CC6459DF" RenderTransformOrigin="0.5,0.5"/>
+                            <Habitica:SimpleTaskCard Title="步行 8000 步"  Deadline="2019/06/27" IsShowDeadline="False"  OverdueColor="Red" FinishColor="LightGray" ProcessColor="#CC6459DF"/>
                             <Habitica:SimpleTaskCard Title="大学生英语四级考试复习" FinishColor="LightGray" ProcessColor="#CC6459DF"/>
                             <Habitica:SimpleTaskCard Title="大学生英语四级考试复习"/>
                         </StackPanel>
@@ -48,14 +48,37 @@
                 </Grid>
             </TabItem>
             <TabItem Padding="15 5" Margin="0" Header="日常">
-                
+
             </TabItem>
             <TabItem Padding="15 5" Margin="0" Header="目标">
 
             </TabItem>
             <TabItem Padding="15 5" Margin="0" Header="设置">
-
+                <StackPanel>
+                    <TextBlock Margin="0 20 0 0" TextAlignment="Center" FontSize="24">用户信息</TextBlock>
+                    <Grid Margin="10 40">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="40"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                            <RowDefinition Height="40"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="80"></ColumnDefinition>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Padding="0 0 10 0" TextAlignment="Right" VerticalAlignment="Center" FontSize="16">用户ID:</TextBlock>
+                        <TextBox x:Name="userIdInput" Grid.Row="0" Grid.Column="1" VerticalContentAlignment="Center"></TextBox>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Padding="0 0 10 0" TextAlignment="Right" VerticalAlignment="Center" FontSize="16">API令牌:</TextBlock>
+                        <TextBox x:Name="apiTokenInput" Grid.Row="2" Grid.Column="1" VerticalContentAlignment="Center"></TextBox>
+                    </Grid>
+                    <WrapPanel Orientation="Horizontal" FlowDirection="RightToLeft" Margin="10 0">
+                        <Button x:Name="saveSettingButton" Click="SaveSetting" Margin="0 0 5 0" Style="{StaticResource AccentedSquareButtonStyle}" FontSize="16" Cursor="Hand">保存设置</Button>
+                    </WrapPanel>
+                </StackPanel>
             </TabItem>
         </Controls:MetroAnimatedSingleRowTabControl>
+        <StackPanel x:Name="MessageBar" Height="32" VerticalAlignment="Top" Opacity="0" Visibility="Collapsed">
+            <TextBlock x:Name="MessageBarContent" TextAlignment="Center" FontSize="25" Foreground="White"/>
+        </StackPanel>
     </Grid>
 </Controls:MetroWindow>

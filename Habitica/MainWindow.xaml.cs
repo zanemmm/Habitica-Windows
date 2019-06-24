@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -17,6 +18,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using MahApps.Metro.Controls;
+using Newtonsoft.Json;
+using Habitica.Models;
 
 namespace Habitica
 {
@@ -37,6 +40,29 @@ namespace Habitica
             InitializeComponent();
         }
 
+        public void ShowMessage(string message, bool isSuccess)
+        {
+            MessageBar.Visibility = Visibility.Visible;
+            MessageBarContent.Text = message;
+            MessageBar.Background = isSuccess ? Utils.Colors.Green : Utils.Colors.Red;
+            
+            DoubleAnimation showAnimation = new DoubleAnimation
+            {
+                From = 0,
+                To = 1,
+                Duration = new Duration(TimeSpan.FromSeconds(.4))
+            };
+            DoubleAnimation hiddenAnimation = new DoubleAnimation
+            {
+                From = 1,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromSeconds(2))
+            };
+            showAnimation.Completed += new EventHandler((object a, EventArgs b) => { MessageBar.BeginAnimation(OpacityProperty, hiddenAnimation); });
+            hiddenAnimation.Completed += new EventHandler((object a, EventArgs b) => { MessageBar.Visibility = Visibility.Collapsed; });
+            MessageBar.BeginAnimation(OpacityProperty, hiddenAnimation);
+        }
+
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //// 窗口嵌入桌面
@@ -45,11 +71,10 @@ namespace Habitica
             //pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SHELLDLL_DefVIew", null);
             //pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SysListView32", null);
             //SetParent(hWnd, pWnd);
-        }
 
-        private void Tile_Click(object sender, RoutedEventArgs e)
-        {
-
+            Setting setting = getSetting();
+            userIdInput.Text = setting.UserId;
+            apiTokenInput.Text = setting.ApiToken;
         }
 
         private void AddTodyTargetButton_Click(object sender, RoutedEventArgs e)
@@ -88,6 +113,40 @@ namespace Habitica
         private void TodayTargetRemoved(object sender, SimpleTaskCard e)
         {
             todayTargetsList.Children.Remove(e);
+        }
+
+        private void SaveSetting(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string dataDir = Directory.GetCurrentDirectory() + @"\Data";
+                if (!Directory.Exists(dataDir))
+                {
+                    Directory.CreateDirectory(dataDir);
+                }
+
+                Setting setting = new Setting(userIdInput.Text, apiTokenInput.Text);
+                string settingJson = JsonConvert.SerializeObject(setting);
+                string settingPath = dataDir + @"\setting.json";
+                File.WriteAllText(settingPath, settingJson);
+                ShowMessage("保存设置成功", true);
+            }
+            catch (Exception exception)
+            {
+                ShowMessage(exception.ToString(), false);
+            }
+        }
+
+        private Setting getSetting()
+        {
+            string settingPath = Directory.GetCurrentDirectory() + @"\Data\setting.json";
+            if (!File.Exists(settingPath))
+            {
+                return new Setting("", "");
+            }
+
+            Setting setting = JsonConvert.DeserializeObject<Setting>(File.ReadAllText(settingPath));
+            return setting;
         }
     }
 }
