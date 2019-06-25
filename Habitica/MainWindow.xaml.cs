@@ -20,6 +20,7 @@ using System.Windows.Shapes;
 using MahApps.Metro.Controls;
 using Newtonsoft.Json;
 using Habitica.Models;
+using Habitica.Utils;
 
 namespace Habitica
 {
@@ -34,6 +35,8 @@ namespace Habitica
         private static extern IntPtr FindWindowEx(IntPtr hWnd1, IntPtr hWnd2, string lpsz1, string lpsz2);
         [DllImport("user32.dll")]
         public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
+
+        private Setting AppSetting;
 
         public MainWindow()
         {
@@ -72,9 +75,9 @@ namespace Habitica
             //pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SysListView32", null);
             //SetParent(hWnd, pWnd);
 
-            Setting setting = getSetting();
-            userIdInput.Text = setting.UserId;
-            apiTokenInput.Text = setting.ApiToken;
+            AppSetting = GetSetting();
+            userIdInput.Text = AppSetting.UserId;
+            apiTokenInput.Text = AppSetting.ApiToken;
         }
 
         private void AddTodyTargetButton_Click(object sender, RoutedEventArgs e)
@@ -125,8 +128,9 @@ namespace Habitica
                     Directory.CreateDirectory(dataDir);
                 }
 
-                Setting setting = new Setting(userIdInput.Text, apiTokenInput.Text);
-                string settingJson = JsonConvert.SerializeObject(setting);
+                AppSetting.UserId = userIdInput.Text;
+                AppSetting.ApiToken = apiTokenInput.Text;
+                string settingJson = JsonConvert.SerializeObject(AppSetting);
                 string settingPath = dataDir + @"\setting.json";
                 File.WriteAllText(settingPath, settingJson);
                 ShowMessage("保存设置成功", true);
@@ -137,7 +141,7 @@ namespace Habitica
             }
         }
 
-        private Setting getSetting()
+        private Setting GetSetting()
         {
             string settingPath = Directory.GetCurrentDirectory() + @"\Data\setting.json";
             if (!File.Exists(settingPath))

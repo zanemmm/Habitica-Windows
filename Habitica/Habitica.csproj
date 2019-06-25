@@ -82,8 +82,11 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\Setting.cs" />
+    <Compile Include="Models\Tag.cs" />
+    <Compile Include="Models\Task.cs" />
     <Compile Include="SimpleTaskCard.cs" />
     <Compile Include="Utils\Colors.cs" />
+    <Compile Include="Utils\HttpApi.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
