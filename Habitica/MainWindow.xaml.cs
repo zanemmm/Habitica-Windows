@@ -21,6 +21,8 @@ using MahApps.Metro.Controls;
 using Newtonsoft.Json;
 using Habitica.Models;
 using Habitica.Utils;
+using Task = System.Threading.Tasks.Task;
+using AppTask = Habitica.Models.Task;
 
 namespace Habitica
 {
@@ -37,6 +39,11 @@ namespace Habitica
         public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
 
         private Setting AppSetting;
+        private HttpApi HttpApi;
+
+        private List<AppTask> Tasks;
+        private List<Tag> Tags;
+        private Tag TodayTargetTag;
 
         public MainWindow()
         {
@@ -45,28 +52,35 @@ namespace Habitica
 
         public void ShowMessage(string message, bool isSuccess)
         {
+            if (message == string.Empty)
+            {
+                return;
+            }
             MessageBar.Visibility = Visibility.Visible;
             MessageBarContent.Text = message;
             MessageBar.Background = isSuccess ? Utils.Colors.Green : Utils.Colors.Red;
-            
+            // 显示动画
             DoubleAnimation showAnimation = new DoubleAnimation
             {
                 From = 0,
                 To = 1,
                 Duration = new Duration(TimeSpan.FromSeconds(.4))
             };
+            // 消失动画
             DoubleAnimation hiddenAnimation = new DoubleAnimation
             {
                 From = 1,
                 To = 0,
                 Duration = new Duration(TimeSpan.FromSeconds(2))
             };
+            // 显示动画执行完毕后执行消失动画
             showAnimation.Completed += new EventHandler((object a, EventArgs b) => { MessageBar.BeginAnimation(OpacityProperty, hiddenAnimation); });
+            // 消失动画执行完毕后隐藏消息通知
             hiddenAnimation.Completed += new EventHandler((object a, EventArgs b) => { MessageBar.Visibility = Visibility.Collapsed; });
             MessageBar.BeginAnimation(OpacityProperty, hiddenAnimation);
         }
 
-        private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+        private async void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //// 窗口嵌入桌面
             //IntPtr hWnd = new WindowInteropHelper(Application.Current.MainWindow).Handle;
@@ -78,35 +92,41 @@ namespace Habitica
             AppSetting = GetSetting();
             userIdInput.Text = AppSetting.UserId;
             apiTokenInput.Text = AppSetting.ApiToken;
+
+            HttpApi = new HttpApi(AppSetting);
+            // 获取 Habitica 数据
+            Tasks = await HttpApi.GetAllTasks();
+            Tags = await HttpApi.GetAllTags();
+            // 获取今日目标标签
+            TodayTargetTag = HttpApi.TodayTargetTagFilter(Tags);
+            if (TodayTargetTag == null)
+            {
+                TodayTargetTag = HttpApi.CreateTag("TodayTarget").Result;
+            }
+            // 初始化今日目标列表
+            InitTodayTargetList();
         }
 
-        private void AddTodyTargetButton_Click(object sender, RoutedEventArgs e)
+        private void InitTodayTargetList()
         {
-            //StackPanel p = FindName("TodayTargetsList") as StackPanel;
-            //DoubleAnimation a = new DoubleAnimation
-            //{
-            //    From = 0,
-            //    To = -Width,
-            //    Duration = new Duration(TimeSpan.FromSeconds(.5))
-            //};
-            //TranslateTransform t = new TranslateTransform(0, 0);
-            //p.Children[0].RenderTransform = t;
-            //p.Children[0].RenderTransform.BeginAnimation(TranslateTransform.XProperty, a);
-            //a.Children.RemoveAt(0);
+
+            List<AppTask> todayTargetTasks = HttpApi.TodayTargetTaskFilter(Tasks, TodayTargetTag);
+            foreach (AppTask task in todayTargetTasks)
+            {
+                todayTargetsList.Children.Add(task.ToSimpleTaskCard(false));
+            }
         }
 
-        private void AddNewTodayTarget(object sender, RoutedEventArgs e)
+        private async void AddNewTodayTarget(object sender, RoutedEventArgs e)
         {
+            newTodayTargetName.Text = newTodayTargetName.Text.Trim();
             if (newTodayTargetName.Text == "")
             {
                 return;
             }
-            SimpleTaskCard card = new SimpleTaskCard
-            {
-                Title = newTodayTargetName.Text,
-                Deadline = DateTime.Now.Date,
-                IsShowDeadline = false,
-            };
+            string[] tags = new string[] { TodayTargetTag.Id };
+            AppTask task = await HttpApi.CreateTask(newTodayTargetName.Text, "todo", tags, DateTime.Now.AddDays(1).Date.ToString());
+            SimpleTaskCard card = task.ToSimpleTaskCard(false);
             card.CardRemove += TodayTargetRemoved;
             todayTargetsList.Children.Add(card);
             todayTargetsListScroll.ScrollToBottom();

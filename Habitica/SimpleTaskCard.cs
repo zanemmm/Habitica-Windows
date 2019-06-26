@@ -127,7 +127,16 @@ namespace Habitica
             set => SetValue(IsShowDeadlineProperty, value);
         }
 
-        public static readonly DependencyProperty TitleProperty = DependencyProperty.Register("Title", typeof(string), typeof(SimpleTaskCard), new PropertyMetadata(System.String.Empty));
+        public static readonly DependencyProperty IdProperty = DependencyProperty.Register("Id", typeof(string), typeof(SimpleTaskCard), new PropertyMetadata(string.Empty));
+        [Bindable(true)]
+        [Category("Appearance")]
+        public string Id
+        {
+            get => (string)GetValue(IdProperty);
+            set => SetValue(IdProperty, value);
+        }
+
+        public static readonly DependencyProperty TitleProperty = DependencyProperty.Register("Title", typeof(string), typeof(SimpleTaskCard), new PropertyMetadata(string.Empty));
         [Bindable(true)]
         [Category("Appearance")]
         public string Title
@@ -174,13 +183,13 @@ namespace Habitica
 
         private void CheckDeadline()
         {
+            taskDeadliineBlock.Text = Deadline.ToShortDateString();
             // 没有设置 Deadline 或 DeadLine 未至
             if (Deadline == null || Deadline == DateTime.MinValue || Deadline.Date >= DateTime.Now.Date)
             {
                 IsOverdue = false;
                 return;
             }
-            taskDeadliineBlock.Text = Deadline.ToShortDateString();
             IsOverdue = true;
         }
 

@@ -17,24 +17,15 @@ namespace Habitica.Utils
     {
         private static readonly HttpClient Client = new HttpClient();
 
-        private static HttpApi Instance;
-
         private const string BaseUrl = "https://habitica.com/api/v3/";
 
         private const string ClientToken = "88e6cb45-5700-4643-b866-f333aa3539b5-WindowsHabitica";
 
         public Setting Setting;
 
-        public static HttpApi New(Setting setting)
+        public HttpApi(Setting setting)
         {
-            if (Instance == null)
-            {
-                Instance = new HttpApi
-                {
-                    Setting = setting
-                };
-            }
-            return Instance;
+            Setting = setting;
         }
 
         public async Task<List<AppTask>> GetAllTasks()
@@ -44,22 +35,49 @@ namespace Habitica.Utils
             HttpResponseMessage response = await Client.SendAsync(AddHeaderToRequest(request));
             // 获取响应
             string json = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine(json);
             // 格式化响应
             List<AppTask> tasks = GetListResponseData<AppTask>(json);
 
             return tasks;
         }
 
-        public List<AppTask> FilterTodayTargetOutOfTasks(List<AppTask> tasks, Tag todayTargetTag)
+        public async Task<AppTask> CreateTask(string text, string type, string[] tags = null, string date = null)
+        {
+            // 构造请求
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, BaseUrl + "tasks/user");
+            request = AddHeaderToRequest(request);
+            JObject c = new JObject
+            {
+                { "text", text },
+                { "type", type },
+                { "tags", new JArray(tags) },
+                { "date", date }
+            };
+            Debug.WriteLine(c.ToString());
+            request.Content = new StringContent(c.ToString());
+            request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json"); // 必须设置请求内容为 JSON 格式，否则服务器无法识别
+            // 发起请求
+            HttpResponseMessage response = await Client.SendAsync(request);
+            // 获取响应
+            string json = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine(json);
+            AppTask newTask = GetObjectResponseData<AppTask>(json);
+
+            return newTask;
+        }
+
+        public List<AppTask> TodayTargetTaskFilter(List<AppTask> tasks, Tag todayTargetTag)
         {
             List<AppTask> todayTargetTasks = new List<AppTask>();
             foreach (AppTask task in tasks)
             {
-                if (task.Tags.Contains(todayTargetTag.Id))
+                if (task.Tags.Contains(todayTargetTag.Id) && task.Type == AppTask.TypeToString(TaskType.Todo))
                 {
                     todayTargetTasks.Add(task);
                 }
             }
+
             return todayTargetTasks;
         }
 
@@ -93,6 +111,18 @@ namespace Habitica.Utils
             return tag;
         }
 
+        public Tag TodayTargetTagFilter(List<Tag> tags)
+        {
+            foreach (Tag tag in tags)
+            {
+                if (tag.Name == "TodayTarget")
+                {
+                    return tag;
+                }
+            }
+            return null;
+        }
+
         private List<Model> GetListResponseData<Model>(string json)
         {
             JObject jObject = JObject.Parse(json);
@@ -119,19 +149,6 @@ namespace Habitica.Utils
             request.Headers.Add("x-api-key", Setting.ApiToken);
             request.Headers.Add("x-client", ClientToken);
             return request;
-        }
-
-        private async Task<Tag> GetTodayTargetTag()
-        {
-            List<Tag> tags = await GetAllTags();
-            foreach (Tag tag in tags)
-            {
-                if (tag.Name == "TodayTarget")
-                {
-                    return tag;
-                }
-            }
-            return null;
         }
     }
 }

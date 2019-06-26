@@ -24,9 +24,6 @@
                     </Grid.RowDefinitions>
                     <ScrollViewer x:Name="todayTargetsListScroll" Grid.Row="0" VerticalScrollBarVisibility="Hidden" PanningMode="VerticalOnly">
                         <StackPanel x:Name="todayTargetsList">
-                            <Habitica:SimpleTaskCard Title="步行 8000 步"  Deadline="2019/06/27" IsShowDeadline="False"  OverdueColor="Red" FinishColor="LightGray" ProcessColor="#CC6459DF"/>
-                            <Habitica:SimpleTaskCard Title="大学生英语四级考试复习" FinishColor="LightGray" ProcessColor="#CC6459DF"/>
-                            <Habitica:SimpleTaskCard Title="大学生英语四级考试复习"/>
                         </StackPanel>
                     </ScrollViewer>
                     <Grid Grid.Row="1" Margin="0 5 0 0">
