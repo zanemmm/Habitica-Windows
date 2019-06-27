@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -92,8 +93,7 @@ namespace Habitica
             taskCard.TouchUp += TaskCard_TouchUp;
             taskCard.TouchLeave += TaskCard_TouchLeave;
             taskCard.TouchMove += TaskCard_TouchMove;
-
-
+            // 位移对象
             RenderTransform = moveTranslateTransform;
             // 状态初始化
             CheckDeadline();
@@ -125,6 +125,15 @@ namespace Habitica
         {
             get => (bool)GetValue(IsShowDeadlineProperty);
             set => SetValue(IsShowDeadlineProperty, value);
+        }
+
+        public static readonly DependencyProperty IsMoveableProperty = DependencyProperty.Register("IsMoveable", typeof(bool), typeof(SimpleTaskCard), new PropertyMetadata(true));
+        [Bindable(true)]
+        [Category("Appearance")]
+        public bool IsMoveable
+        {
+            get => (bool)GetValue(IsMoveableProperty);
+            set => SetValue(IsMoveableProperty, value);
         }
 
         public static readonly DependencyProperty IdProperty = DependencyProperty.Register("Id", typeof(string), typeof(SimpleTaskCard), new PropertyMetadata(string.Empty));
@@ -180,6 +189,38 @@ namespace Habitica
             get => (DateTime)GetValue(DeadlineProperty);
             set => SetValue(DeadlineProperty, value);
         }
+
+        //public void HiddeCardWithAnimation(Action afterAnimation)
+        //{
+        //    moveTranslateTransform.X = 0;
+        //    DoubleAnimation animation = new DoubleAnimation
+        //    {
+        //        From = 0,
+        //        To = -ActualWidth,
+        //        Duration = new Duration(TimeSpan.FromSeconds(.35))
+        //    };
+        //    animation.Completed += new EventHandler((object a, EventArgs b) =>
+        //    {
+        //        Visibility = Visibility.Collapsed;
+        //        afterAnimation();
+        //        RenderTransform = moveTranslateTransform;
+        //    });
+        //    moveTranslateTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+        //}
+
+        //public void ShowCardWithAnimation(Action afterAnimation)
+        //{
+        //    Visibility = Visibility.Visible;
+        //    moveTranslateTransform.X = -ActualWidth;
+        //    DoubleAnimation animation = new DoubleAnimation
+        //    {
+        //        From = -ActualWidth,
+        //        To = 0,
+        //        Duration = new Duration(TimeSpan.FromSeconds(.35))
+        //    };
+        //    animation.Completed += new EventHandler((object a, EventArgs b) => { afterAnimation(); RenderTransform = moveTranslateTransform; });
+        //    moveTranslateTransform.BeginAnimation(TranslateTransform.XProperty, animation);
+        //}
 
         private void CheckDeadline()
         {
@@ -273,11 +314,12 @@ namespace Habitica
 
         private void TaskCard_MouseMove(object sender, RoutedEventArgs e)
         {
-            if (isMouseDown == false)
+            if (isMouseDown == false || IsMoveable == false)
             {
                 return;
             }
             Point movePoint = Mouse.GetPosition(Application.Current.MainWindow);
+
             if (movePoint.X > mouseDownPoint.X)
             {
                 return;
@@ -287,13 +329,16 @@ namespace Habitica
 
 
         private TouchPoint touchDownPoint;
+        private bool isTouchDown = false;
         private void TaskCard_TouchDown(object sender, TouchEventArgs e)
         {
+            isTouchDown = true;
             touchDownPoint = e.GetTouchPoint(Application.Current.MainWindow);
         }
 
         private void TaskCard_TouchUp(object sender, TouchEventArgs e)
         {
+            isTouchDown = false;
             if (moveTranslateTransform.X + ActualWidth * 0.35 < 0)
             {
                 DoubleAnimation animation = new DoubleAnimation
@@ -321,6 +366,10 @@ namespace Habitica
 
         private void TaskCard_TouchMove(object sender, TouchEventArgs e)
         {
+            if (isTouchDown == false || IsMoveable == false)
+            {
+                return;
+            }
             TouchPoint movePoint = e.GetTouchPoint(Application.Current.MainWindow);
             if (movePoint.Position.X > touchDownPoint.Position.X)
             {

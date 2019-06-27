@@ -35,7 +35,6 @@ namespace Habitica.Utils
             HttpResponseMessage response = await Client.SendAsync(AddHeaderToRequest(request));
             // 获取响应
             string json = await response.Content.ReadAsStringAsync();
-            Debug.WriteLine(json);
             // 格式化响应
             List<AppTask> tasks = GetListResponseData<AppTask>(json);
 
@@ -51,9 +50,15 @@ namespace Habitica.Utils
             {
                 { "text", text },
                 { "type", type },
-                { "tags", new JArray(tags) },
-                { "date", date }
             };
+            if (tags != null)
+            {
+                c.Add("tags", new JArray(tags));
+            }
+            if (date != null)
+            {
+                c.Add("date", date);
+            }
             Debug.WriteLine(c.ToString());
             request.Content = new StringContent(c.ToString());
             request.Content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json"); // 必须设置请求内容为 JSON 格式，否则服务器无法识别
@@ -65,6 +70,32 @@ namespace Habitica.Utils
             AppTask newTask = GetObjectResponseData<AppTask>(json);
 
             return newTask;
+        }
+
+        public async Task<bool> DeleteTask(string id)
+        {
+            // 构造请求
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Delete, BaseUrl + $"tasks/{id}");
+            request = AddHeaderToRequest(request);
+            // 发起请求
+            HttpResponseMessage response = await Client.SendAsync(request);
+            // 获取响应
+            string json = await response.Content.ReadAsStringAsync();
+
+            return GetResponseStatus(json);
+        }
+
+        public async Task<bool> ScoreTask(string id, string direction)
+        {
+            // 构造请求
+            HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, BaseUrl + $"tasks/{id}/score/{direction}");
+            request = AddHeaderToRequest(request);
+            // 发起请求
+            HttpResponseMessage response = await Client.SendAsync(request);
+            // 获取响应
+            string json = await response.Content.ReadAsStringAsync();
+
+            return GetResponseStatus(json);
         }
 
         public List<AppTask> TodayTargetTaskFilter(List<AppTask> tasks, Tag todayTargetTag)
@@ -79,6 +110,20 @@ namespace Habitica.Utils
             }
 
             return todayTargetTasks;
+        }
+
+        public List<AppTask> PlanTargetTaskFilter(List<AppTask> tasks, Tag todayTargetTag)
+        {
+            List<AppTask> planTargetTasks = new List<AppTask>();
+            foreach (AppTask task in tasks)
+            {
+                if (!task.Tags.Contains(todayTargetTag.Id) && task.Type == AppTask.TypeToString(TaskType.Todo))
+                {
+                    planTargetTasks.Add(task);
+                }
+            }
+
+            return planTargetTasks;
         }
 
         public async Task<List<Tag>> GetAllTags()
@@ -121,6 +166,12 @@ namespace Habitica.Utils
                 }
             }
             return null;
+        }
+
+        private bool GetResponseStatus(string json)
+        {
+            JObject result = JObject.Parse(json);
+            return result["success"].ToObject<bool>();
         }
 
         private List<Model> GetListResponseData<Model>(string json)

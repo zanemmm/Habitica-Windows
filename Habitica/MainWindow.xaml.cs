@@ -50,7 +50,7 @@ namespace Habitica
             InitializeComponent();
         }
 
-        public void ShowMessage(string message, bool isSuccess)
+        public void ShowMessage(string message, bool isSuccess = true)
         {
             if (message == string.Empty)
             {
@@ -92,28 +92,50 @@ namespace Habitica
             AppSetting = GetSetting();
             userIdInput.Text = AppSetting.UserId;
             apiTokenInput.Text = AppSetting.ApiToken;
-
-            HttpApi = new HttpApi(AppSetting);
-            // 获取 Habitica 数据
-            Tasks = await HttpApi.GetAllTasks();
-            Tags = await HttpApi.GetAllTags();
-            // 获取今日目标标签
-            TodayTargetTag = HttpApi.TodayTargetTagFilter(Tags);
-            if (TodayTargetTag == null)
+            try
             {
-                TodayTargetTag = HttpApi.CreateTag("TodayTarget").Result;
+                HttpApi = new HttpApi(AppSetting);
+                // 获取 Habitica 数据
+                Tasks = await HttpApi.GetAllTasks();
+                Tags = await HttpApi.GetAllTags();
+                // 获取今日目标标签
+                TodayTargetTag = HttpApi.TodayTargetTagFilter(Tags);
+                if (TodayTargetTag == null)
+                {
+                    TodayTargetTag = HttpApi.CreateTag("TodayTarget").Result;
+                }
+                // 初始化今日目标列表
+                InitTodayTargetList();
+                InitPlanTargetList();
             }
-            // 初始化今日目标列表
-            InitTodayTargetList();
+            catch (Exception exception)
+            {
+                ShowMessage(exception.Message, false);
+            }
         }
 
         private void InitTodayTargetList()
         {
-
             List<AppTask> todayTargetTasks = HttpApi.TodayTargetTaskFilter(Tasks, TodayTargetTag);
             foreach (AppTask task in todayTargetTasks)
             {
-                todayTargetsList.Children.Add(task.ToSimpleTaskCard(false));
+                SimpleTaskCard card = task.ToSimpleTaskCard(false);
+                card.CardRemove += TargetRemoved;
+                card.StatusChange += TargetStatusChange;
+                todayTargetsList.Children.Add(card);
+            }
+        }
+
+        private void InitPlanTargetList()
+        {
+
+            List<AppTask> planTargetTasks = HttpApi.PlanTargetTaskFilter(Tasks, TodayTargetTag);
+            foreach (AppTask task in planTargetTasks)
+            {
+                SimpleTaskCard card = task.ToSimpleTaskCard(false);
+                card.CardRemove += TargetRemoved;
+                card.StatusChange += TargetStatusChange;
+                planTargetsList.Children.Add(card);
             }
         }
 
@@ -124,18 +146,66 @@ namespace Habitica
             {
                 return;
             }
-            string[] tags = new string[] { TodayTargetTag.Id };
-            AppTask task = await HttpApi.CreateTask(newTodayTargetName.Text, "todo", tags, DateTime.Now.AddDays(1).Date.ToString());
-            SimpleTaskCard card = task.ToSimpleTaskCard(false);
-            card.CardRemove += TodayTargetRemoved;
-            todayTargetsList.Children.Add(card);
-            todayTargetsListScroll.ScrollToBottom();
-            newTodayTargetName.Text = "";
+            try
+            {
+                string[] tags = new string[] { TodayTargetTag.Id };
+                AppTask task = await HttpApi.CreateTask(newTodayTargetName.Text, "todo", tags, DateTime.Now.AddDays(1).Date.ToString());
+                SimpleTaskCard card = task.ToSimpleTaskCard(false);
+                card.CardRemove += TargetRemoved;
+                card.StatusChange += TargetStatusChange;
+                todayTargetsList.Children.Add(card);
+                todayTargetsListScroll.ScrollToBottom();
+                newTodayTargetName.Text = "";
+            }
+            catch (Exception exception)
+            {
+                ShowMessage(exception.Message, false);
+            }
+        }
+        private async void AddNewPlanTarget(object sender, RoutedEventArgs e)
+        {
+            newPlanTargetName.Text = newPlanTargetName.Text.Trim();
+            if (newPlanTargetName.Text == "")
+            {
+                return;
+            }
+            try
+            {
+                AppTask task = await HttpApi.CreateTask(newPlanTargetName.Text, "todo", date: newPlanTargetDeadline.SelectedDate?.AddDays(1).Date.ToString());
+                SimpleTaskCard card = task.ToSimpleTaskCard(false);
+                card.CardRemove += TargetRemoved;
+                card.StatusChange += TargetStatusChange;
+                planTargetsList.Children.Add(card);
+                planTargetsListScroll.ScrollToBottom();
+                newPlanTargetName.Text = "";
+            }
+            catch (Exception exception)
+            {
+                ShowMessage(exception.Message, false);
+            }
         }
 
-        private void TodayTargetRemoved(object sender, SimpleTaskCard e)
+        private void TargetRemoved(object sender, SimpleTaskCard e)
         {
+            if (!e.IsFinsh)
+            {
+                SimpleTaskCard card = (SimpleTaskCard)sender;
+                _ = HttpApi.DeleteTask(card.Id);
+            }
             todayTargetsList.Children.Remove(e);
+        }
+
+        private void TargetStatusChange(object sender, SimpleTaskCard.Status e)
+        {
+            SimpleTaskCard card = (SimpleTaskCard)sender;
+            if (e == SimpleTaskCard.Status.Finish)
+            {
+                _ = HttpApi.ScoreTask(card.Id, "up");
+            }
+            else if (e == SimpleTaskCard.Status.Process)
+            {
+                _ = HttpApi.ScoreTask(card.Id, "down");
+            }
         }
 
         private void SaveSetting(object sender, RoutedEventArgs e)

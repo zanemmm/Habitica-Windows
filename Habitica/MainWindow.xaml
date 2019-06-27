@@ -13,10 +13,10 @@
         Width="360"
         WindowStartupLocation="CenterScreen" 
         ResizeMode="NoResize" 
-        Loaded="MetroWindow_Loaded" IsMinButtonEnabled="False" IsMaxRestoreButtonEnabled="False" ShowMaxRestoreButton="False" ShowMinButton="False" ShowTitleBar="True" ShowCloseButton="True">
+        Loaded="MetroWindow_Loaded" IsMinButtonEnabled="False" IsMaxRestoreButtonEnabled="False" ShowMaxRestoreButton="False" ShowMinButton="False" ShowTitleBar="True" ShowCloseButton="True" Background="#D8FFFFFF" AllowsTransparency="True" WindowStyle="None">
     <Grid>
-        <Controls:MetroAnimatedSingleRowTabControl Padding="0" TabStripPlacement="Bottom" Controls:ScrollViewerHelper.IsHorizontalScrollWheelEnabled="False">
-            <TabItem Padding="15 5" Margin="0" Header="今天" IsSelected="True">
+        <Controls:MetroAnimatedSingleRowTabControl Padding="0" TabStripPlacement="Bottom" Controls:ScrollViewerHelper.IsHorizontalScrollWheelEnabled="False" Background="#00000000">
+            <TabItem Padding="15 5" Margin="0" Header="今天">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*"></RowDefinition>
@@ -47,8 +47,33 @@
             <TabItem Padding="15 5" Margin="0" Header="日常">
 
             </TabItem>
-            <TabItem Padding="15 5" Margin="0" Header="目标">
-
+            <TabItem Padding="15 5" Margin="0" Header="计划">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="40"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <ScrollViewer x:Name="planTargetsListScroll" Grid.Row="0" VerticalScrollBarVisibility="Hidden" PanningMode="VerticalOnly">
+                        <StackPanel x:Name="planTargetsList">
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Grid Grid.Row="1" Margin="0 5 0 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="25.6"></ColumnDefinition>
+                            <ColumnDefinition Width="80"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="newPlanTargetName" Margin="5 0 0 0" Grid.Column="0"  VerticalContentAlignment="Center" FontSize="16"></TextBox>
+                        <DatePicker x:Name="newPlanTargetDeadline" Grid.Column="1" VerticalAlignment="Stretch" ToolTip="截至日期">
+                            <DatePicker.Resources>
+                                <Style TargetType="DatePickerTextBox">
+                                    <Setter Property="Visibility" Value="Hidden"/>
+                                </Style>
+                            </DatePicker.Resources>
+                        </DatePicker>
+                        <Button x:Name="addPlanTargetButton" Click="AddNewPlanTarget" Grid.Column="2" Margin="0 0 5 0" VerticalAlignment="Stretch" Style="{StaticResource AccentedSquareButtonStyle}" FontSize="16" Cursor="Hand">新增</Button>
+                    </Grid>
+                </Grid>
             </TabItem>
             <TabItem Padding="15 5" Margin="0" Header="设置">
                 <StackPanel>
