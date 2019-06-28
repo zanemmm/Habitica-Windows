@@ -12,6 +12,7 @@ namespace Habitica.Models
         public string Id { get; set; }
         public string Type { get; set; }
         public string Text { get; set; }
+        public bool? Completed { get; set; }
         public string[] Tags { get; set; }
         public string Date { get; set; }
 
@@ -22,13 +23,18 @@ namespace Habitica.Models
             {
                 deadline = DateTime.Parse(Date);
             }
-
+            bool isFinish = false;
+            if (Completed != null)
+            {
+                isFinish = (bool)Completed;
+            }
             SimpleTaskCard card = new SimpleTaskCard
             {
                 Id = Id,
                 Title = Text,
                 Deadline = deadline,
                 IsShowDeadline = isShowDeadline,
+                IsFinsh = isFinish,
             };
             return card;
         }

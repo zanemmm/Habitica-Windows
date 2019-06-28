@@ -35,6 +35,7 @@ namespace Habitica.Utils
             HttpResponseMessage response = await Client.SendAsync(AddHeaderToRequest(request));
             // 获取响应
             string json = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine(json);
             // 格式化响应
             List<AppTask> tasks = GetListResponseData<AppTask>(json);
 
@@ -110,6 +111,20 @@ namespace Habitica.Utils
             }
 
             return todayTargetTasks;
+        }
+
+        public List<AppTask> DailyTargetTaskFilter(List<AppTask> tasks)
+        {
+            List<AppTask> dailyTargetTasks = new List<AppTask>();
+            foreach (AppTask task in tasks)
+            {
+                if (task.Type == AppTask.TypeToString(TaskType.Daily))
+                {
+                    dailyTargetTasks.Add(task);
+                }
+            }
+
+            return dailyTargetTasks;
         }
 
         public List<AppTask> PlanTargetTaskFilter(List<AppTask> tasks, Tag todayTargetTag)

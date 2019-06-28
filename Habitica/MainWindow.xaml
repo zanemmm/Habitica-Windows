@@ -29,23 +29,32 @@
                     <Grid Grid.Row="1" Margin="0 5 0 0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"></ColumnDefinition>
-                            <!--<ColumnDefinition Width="25.6"></ColumnDefinition>-->
                             <ColumnDefinition Width="80"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
                         <TextBox x:Name="newTodayTargetName" Margin="5 0 0 0" Grid.Column="0"  VerticalContentAlignment="Center" FontSize="16"></TextBox>
-                        <!--<DatePicker Grid.Column="1" VerticalAlignment="Stretch" ToolTip="截至日期">
-                            <DatePicker.Resources>
-                                <Style TargetType="DatePickerTextBox">
-                                    <Setter Property="Visibility" Value="Hidden"/>
-                                </Style>
-                            </DatePicker.Resources>
-                        </DatePicker>-->
                         <Button x:Name="addTodayTargetButton" Click="AddNewTodayTarget" Grid.Column="2" Margin="0 0 5 0" VerticalAlignment="Stretch" Style="{StaticResource AccentedSquareButtonStyle}" FontSize="16" Cursor="Hand">新增</Button>
                     </Grid>
                 </Grid>
             </TabItem>
             <TabItem Padding="15 5" Margin="0" Header="日常">
-
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"></RowDefinition>
+                        <RowDefinition Height="40"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <ScrollViewer x:Name="dailyTargetsListScroll" Grid.Row="0" VerticalScrollBarVisibility="Hidden" PanningMode="VerticalOnly">
+                        <StackPanel x:Name="dailyTargetsList">
+                        </StackPanel>
+                    </ScrollViewer>
+                    <Grid Grid.Row="1" Margin="0 5 0 0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"></ColumnDefinition>
+                            <ColumnDefinition Width="80"></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+                        <TextBox x:Name="newDailyTargetName" Margin="5 0 0 0" Grid.Column="0"  VerticalContentAlignment="Center" FontSize="16"></TextBox>
+                        <Button x:Name="addDailyTargetButton" Click="AddNewDailyTarget" Grid.Column="2" Margin="0 0 5 0" VerticalAlignment="Stretch" Style="{StaticResource AccentedSquareButtonStyle}" FontSize="16" Cursor="Hand">新增</Button>
+                    </Grid>
+                </Grid>
             </TabItem>
             <TabItem Padding="15 5" Margin="0" Header="计划">
                 <Grid>

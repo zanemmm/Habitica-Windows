@@ -104,8 +104,9 @@ namespace Habitica
                 {
                     TodayTargetTag = HttpApi.CreateTag("TodayTarget").Result;
                 }
-                // 初始化今日目标列表
+                // 初始化目标列表
                 InitTodayTargetList();
+                InitDailyTargetList();
                 InitPlanTargetList();
             }
             catch (Exception exception)
@@ -123,6 +124,18 @@ namespace Habitica
                 card.CardRemove += TargetRemoved;
                 card.StatusChange += TargetStatusChange;
                 todayTargetsList.Children.Add(card);
+            }
+        }
+
+        private void InitDailyTargetList()
+        {
+            List<AppTask> dailyTargetTasks = HttpApi.DailyTargetTaskFilter(Tasks);
+            foreach (AppTask task in dailyTargetTasks)
+            {
+                SimpleTaskCard card = task.ToSimpleTaskCard(false);
+                card.CardRemove += TargetRemoved;
+                card.StatusChange += TargetStatusChange;
+                dailyTargetsList.Children.Add(card);
             }
         }
 
@@ -149,7 +162,7 @@ namespace Habitica
             try
             {
                 string[] tags = new string[] { TodayTargetTag.Id };
-                AppTask task = await HttpApi.CreateTask(newTodayTargetName.Text, "todo", tags, DateTime.Now.AddDays(1).Date.ToString());
+                AppTask task = await HttpApi.CreateTask(newTodayTargetName.Text, AppTask.TypeToString(TaskType.Todo), tags, DateTime.Now.AddDays(1).Date.ToString());
                 SimpleTaskCard card = task.ToSimpleTaskCard(false);
                 card.CardRemove += TargetRemoved;
                 card.StatusChange += TargetStatusChange;
@@ -162,6 +175,30 @@ namespace Habitica
                 ShowMessage(exception.Message, false);
             }
         }
+
+        private async void AddNewDailyTarget(object sender, RoutedEventArgs e)
+        {
+            newDailyTargetName.Text = newDailyTargetName.Text.Trim();
+            if (newDailyTargetName.Text == "")
+            {
+                return;
+            }
+            try
+            {
+                AppTask task = await HttpApi.CreateTask(newDailyTargetName.Text, AppTask.TypeToString(TaskType.Daily));
+                SimpleTaskCard card = task.ToSimpleTaskCard(false);
+                card.CardRemove += TargetRemoved;
+                card.StatusChange += TargetStatusChange;
+                dailyTargetsList.Children.Add(card);
+                dailyTargetsListScroll.ScrollToBottom();
+                newDailyTargetName.Text = "";
+            }
+            catch (Exception exception)
+            {
+                ShowMessage(exception.Message, false);
+            }
+        }
+
         private async void AddNewPlanTarget(object sender, RoutedEventArgs e)
         {
             newPlanTargetName.Text = newPlanTargetName.Text.Trim();
@@ -171,7 +208,7 @@ namespace Habitica
             }
             try
             {
-                AppTask task = await HttpApi.CreateTask(newPlanTargetName.Text, "todo", date: newPlanTargetDeadline.SelectedDate?.AddDays(1).Date.ToString());
+                AppTask task = await HttpApi.CreateTask(newPlanTargetName.Text, AppTask.TypeToString(TaskType.Todo), date: newPlanTargetDeadline.SelectedDate?.AddDays(1).Date.ToString());
                 SimpleTaskCard card = task.ToSimpleTaskCard(false);
                 card.CardRemove += TargetRemoved;
                 card.StatusChange += TargetStatusChange;
