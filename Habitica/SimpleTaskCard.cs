@@ -7,6 +7,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 
 namespace Habitica
 {
@@ -48,6 +49,8 @@ namespace Habitica
         private Border taskCheckboxBorder;
         private TextBlock taskNameBlock;
         private TextBlock taskDeadliineBlock;
+        private Canvas clickCanvas;
+        private Ellipse clickEllipseLayer;
 
         // 勾选框图片资源
         private static readonly BitmapImage blankImage = new BitmapImage(new Uri("Resources/check-box-outline-blank.png", UriKind.Relative));
@@ -78,7 +81,10 @@ namespace Habitica
             taskCheckboxBorder = GetTemplateChild("TaskCheckboxBorder") as Border;
             taskNameBlock = GetTemplateChild("taskNameBlock") as TextBlock;
             taskDeadliineBlock = GetTemplateChild("taskDeadliineBlock") as TextBlock;
+            clickCanvas = GetTemplateChild("clickCanvas") as Canvas;
+            clickEllipseLayer = GetTemplateChild("clickEllipseLayer") as Ellipse;
 
+            taskCard.MouseLeftButtonUp += TaskCard_Click; 
             // 勾选框附加点击事件
             taskCheckbox.MouseLeftButtonUp += Checkbox_Click;
             // 卡片附加左移事件
@@ -267,6 +273,32 @@ namespace Habitica
             Status status = CheckStatus();
             // 触发 StatusChangeEvent 事件
             StatusChange?.Invoke(this, status);
+        }
+
+        private void TaskCard_Click(object sender, RoutedEventArgs e)
+        {
+            Point point = Mouse.GetPosition((Border)sender);
+            Canvas.SetLeft(clickEllipseLayer, point.X);
+            Canvas.SetTop(clickEllipseLayer, point.Y);
+
+            DoubleAnimation sizeAnimation = new DoubleAnimation
+            {
+                From = 0,
+                To = ActualWidth*2,
+                Duration = new Duration(TimeSpan.FromSeconds(.3))
+            };
+            ThicknessAnimation marginAnimation = new ThicknessAnimation
+            {
+                From = new Thickness(left: 0, right:0, top:0, bottom:0),
+                To = new Thickness(left: -ActualWidth, right: 0, top: -ActualWidth, bottom: 0),
+                Duration = new Duration(TimeSpan.FromSeconds(.3))
+            };
+            sizeAnimation.AutoReverse = true;
+            marginAnimation.AutoReverse = true;
+
+            clickEllipseLayer.BeginAnimation(MarginProperty, marginAnimation);
+            clickEllipseLayer.BeginAnimation(WidthProperty, sizeAnimation);
+            clickEllipseLayer.BeginAnimation(HeightProperty, sizeAnimation);
         }
 
         private void Checkbox_Click(object sender, RoutedEventArgs e)
