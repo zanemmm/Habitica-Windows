@@ -80,7 +80,7 @@ namespace Habitica
             MessageBar.BeginAnimation(OpacityProperty, hiddenAnimation);
         }
 
-        private async void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+        private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             //// 窗口嵌入桌面
             //IntPtr hWnd = new WindowInteropHelper(Application.Current.MainWindow).Handle;
@@ -92,6 +92,25 @@ namespace Habitica
             AppSetting = GetSetting();
             userIdInput.Text = AppSetting.UserId;
             apiTokenInput.Text = AppSetting.ApiToken;
+
+            if (AppSetting.UserId.Trim() != string.Empty && AppSetting.ApiToken.Trim() != string.Empty)
+            {
+                UpdateDataFromHabitica();
+            }
+        }
+
+        private async void UpdateDataFromHabitica()
+        {
+            DoubleAnimation rotateAnimation = new DoubleAnimation()
+            {
+                From = 0,
+                To = 360,
+                Duration = new Duration(TimeSpan.FromSeconds(.5)),
+                RepeatBehavior = RepeatBehavior.Forever,
+            };
+            RotateTransform rotateTransform = new RotateTransform(0);
+            RefreshButton.RenderTransform = rotateTransform;
+            rotateTransform.BeginAnimation(RotateTransform.AngleProperty, rotateAnimation);
             try
             {
                 HttpApi = new HttpApi(AppSetting);
@@ -112,6 +131,10 @@ namespace Habitica
             catch (Exception exception)
             {
                 ShowMessage(exception.Message, false);
+            }
+            finally
+            {
+                rotateTransform.BeginAnimation(RotateTransform.AngleProperty, null);
             }
         }
 

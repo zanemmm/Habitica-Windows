@@ -83,8 +83,8 @@ namespace Habitica
             taskDeadliineBlock = GetTemplateChild("taskDeadliineBlock") as TextBlock;
             clickCanvas = GetTemplateChild("clickCanvas") as Canvas;
             clickEllipseLayer = GetTemplateChild("clickEllipseLayer") as Ellipse;
-
-            taskCard.MouseLeftButtonUp += TaskCard_Click; 
+            // 卡片点击动画特效
+            taskCard.MouseLeftButtonUp += TaskCard_MouseUp; 
             // 勾选框附加点击事件
             taskCheckbox.MouseLeftButtonUp += Checkbox_Click;
             // 卡片附加左移事件
@@ -275,12 +275,22 @@ namespace Habitica
             StatusChange?.Invoke(this, status);
         }
 
-        private void TaskCard_Click(object sender, RoutedEventArgs e)
+        private bool JustClickCard = true;
+        private void TaskCard_MouseUp(object sender, RoutedEventArgs e)
         {
+            // 只是单纯点击卡片才会触发特效
+            if (!JustClickCard)
+            {
+                JustClickCard = true;
+                return;
+            }
+            // 显示遮罩层
+            clickEllipseLayer.Visibility = Visibility.Visible;
+            // 获取鼠标位置设为圆形遮罩位置
             Point point = Mouse.GetPosition((Border)sender);
             Canvas.SetLeft(clickEllipseLayer, point.X);
             Canvas.SetTop(clickEllipseLayer, point.Y);
-
+            // 遮罩层动画，为了保持遮罩层以圆心为中心点扩大，不仅需要改变大小还需要改变边距，保持圆心位置不变
             DoubleAnimation sizeAnimation = new DoubleAnimation
             {
                 From = 0,
@@ -356,6 +366,8 @@ namespace Habitica
             {
                 return;
             }
+
+            JustClickCard = false;
             moveTranslateTransform.X = movePoint.X - mouseDownPoint.X;
         }
 
