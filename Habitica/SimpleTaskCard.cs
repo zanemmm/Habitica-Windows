@@ -49,7 +49,6 @@ namespace Habitica
         private Border taskCheckboxBorder;
         private TextBlock taskNameBlock;
         private TextBlock taskDeadliineBlock;
-        private Canvas clickCanvas;
         private Ellipse clickEllipseLayer;
 
         // 勾选框图片资源
@@ -81,7 +80,6 @@ namespace Habitica
             taskCheckboxBorder = GetTemplateChild("TaskCheckboxBorder") as Border;
             taskNameBlock = GetTemplateChild("taskNameBlock") as TextBlock;
             taskDeadliineBlock = GetTemplateChild("taskDeadliineBlock") as TextBlock;
-            clickCanvas = GetTemplateChild("clickCanvas") as Canvas;
             clickEllipseLayer = GetTemplateChild("clickEllipseLayer") as Ellipse;
             // 卡片点击动画特效
             taskCard.MouseLeftButtonUp += TaskCard_MouseUp; 

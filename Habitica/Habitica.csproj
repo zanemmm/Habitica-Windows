@@ -145,5 +145,12 @@
   <ItemGroup>
     <Resource Include="Resources\refresh.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\close.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\pin-off.png" />
+    <Resource Include="Resources\pin.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

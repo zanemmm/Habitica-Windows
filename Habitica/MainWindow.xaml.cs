@@ -21,7 +21,6 @@ using MahApps.Metro.Controls;
 using Newtonsoft.Json;
 using Habitica.Models;
 using Habitica.Utils;
-using Task = System.Threading.Tasks.Task;
 using AppTask = Habitica.Models.Task;
 
 namespace Habitica
@@ -103,9 +102,9 @@ namespace Habitica
         {
             DoubleAnimation rotateAnimation = new DoubleAnimation()
             {
-                From = 0,
-                To = 360,
-                Duration = new Duration(TimeSpan.FromSeconds(.5)),
+                From = 360,
+                To = 0,
+                Duration = new Duration(TimeSpan.FromSeconds(.8)),
                 RepeatBehavior = RepeatBehavior.Forever,
             };
             RotateTransform rotateTransform = new RotateTransform(0);
@@ -123,19 +122,57 @@ namespace Habitica
                 {
                     TodayTargetTag = HttpApi.CreateTag("TodayTarget").Result;
                 }
+                // 清理目标列表
+                ClearShouldGetFromHabiticaTask();
                 // 初始化目标列表
                 InitTodayTargetList();
                 InitDailyTargetList();
                 InitPlanTargetList();
+                ShowMessage("更新数据成功");
+                rotateTransform.BeginAnimation(RotateTransform.AngleProperty, null);
+
             }
             catch (Exception exception)
             {
                 ShowMessage(exception.Message, false);
-            }
-            finally
-            {
                 rotateTransform.BeginAnimation(RotateTransform.AngleProperty, null);
             }
+        }
+
+        private void ClearShouldGetFromHabiticaTask()
+        {
+            List<StackPanel> lists = new List<StackPanel>() { todayTargetsList, dailyTargetsList, planTargetsList };
+
+            foreach (StackPanel panel in lists)
+            {
+                // C# 不支持 foreach 遍历过程中删除遍历的 List 中的元素
+                // 所以用两个 foreach，第一个 foreach 用来寻找符合条件的元素
+                // 第二个 foreach 执行删除操作
+                List<SimpleTaskCard> readyToRemove = new List<SimpleTaskCard>();
+                foreach (SimpleTaskCard card in panel.Children)
+                {
+                    // 除了已完成且未过期的任务需要保留，其他都清除，重新从 Habitica 上拉取
+                    if (!card.IsFinsh || card.Deadline == null || DateTime.Now.Date > card.Deadline)
+                    {
+                        readyToRemove.Add(card);
+                    }
+                }
+                foreach(SimpleTaskCard card in readyToRemove)
+                {
+                    panel.Children.Remove(card);
+                }
+                readyToRemove = null;
+            }
+        }
+
+        private void Refresh(object sender, MouseButtonEventArgs e)
+        {
+            if (AppSetting.UserId.Trim() == string.Empty || AppSetting.ApiToken.Trim() == string.Empty)
+            {
+                ShowMessage("请填写用户信息", false);
+                return;
+            }
+            UpdateDataFromHabitica();
         }
 
         private void InitTodayTargetList()
@@ -277,7 +314,10 @@ namespace Habitica
                 {
                     Directory.CreateDirectory(dataDir);
                 }
-
+                if (userIdInput.Text.Trim() == string.Empty || apiTokenInput.Text.Trim() == string.Empty)
+                {
+                    ShowMessage("信息不能为空", false);
+                }
                 AppSetting.UserId = userIdInput.Text;
                 AppSetting.ApiToken = apiTokenInput.Text;
                 string settingJson = JsonConvert.SerializeObject(AppSetting);
@@ -301,6 +341,37 @@ namespace Habitica
 
             Setting setting = JsonConvert.DeserializeObject<Setting>(File.ReadAllText(settingPath));
             return setting;
+        }
+
+        bool IsPinned = false;
+        private static readonly BitmapImage pinImage = new BitmapImage(new Uri("Resources/pin.png", UriKind.Relative));
+        private static readonly BitmapImage pinOffImage = new BitmapImage(new Uri("Resources/pin-off.png", UriKind.Relative));
+        private void PinButton_Click(object sender, MouseButtonEventArgs e)
+        {
+            IsPinned = !IsPinned;
+            if (IsPinned)
+            {
+                TitleBar.Opacity = .85;
+                PinButton.Source = pinImage;
+            }
+            else
+            {
+                TitleBar.Opacity = 1;
+                PinButton.Source = pinOffImage;
+            }
+        }
+
+        private void TitleBar_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed && !IsPinned)
+            {
+                DragMove();
+            }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
         }
     }
 }
