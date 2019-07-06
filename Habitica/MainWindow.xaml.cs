@@ -22,6 +22,8 @@ using Newtonsoft.Json;
 using Habitica.Models;
 using Habitica.Utils;
 using AppTask = Habitica.Models.Task;
+using System.Timers;
+using System.Windows.Threading;
 
 namespace Habitica
 {
@@ -79,23 +81,40 @@ namespace Habitica
             MessageBar.BeginAnimation(OpacityProperty, hiddenAnimation);
         }
 
+        private Timer Timer;
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            //// 窗口嵌入桌面
-            //IntPtr hWnd = new WindowInteropHelper(Application.Current.MainWindow).Handle;
-            //IntPtr pWnd = FindWindow("Progman", null);
-            //pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SHELLDLL_DefVIew", null);
-            //pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SysListView32", null);
-            //SetParent(hWnd, pWnd);
-
+            // 窗口嵌入桌面
+            IntPtr hWnd = new WindowInteropHelper(Application.Current.MainWindow).Handle;
+            IntPtr pWnd = FindWindow("Progman", null);
+            pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SHELLDLL_DefVIew", null);
+            pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SysListView32", null);
+            SetParent(hWnd, pWnd);
+            // 设置窗口位置
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Left = SystemParameters.PrimaryScreenWidth - ActualWidth;
+            Top = 0;
+            // 获取设置并更新数据
             AppSetting = GetSetting();
             userIdInput.Text = AppSetting.UserId;
             apiTokenInput.Text = AppSetting.ApiToken;
-
             if (AppSetting.UserId.Trim() != string.Empty && AppSetting.ApiToken.Trim() != string.Empty)
             {
                 UpdateDataFromHabitica();
             }
+            // 每半小时自动更新数据
+            DispatcherTimer timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromMinutes(30)
+            };
+            timer.Tick += new EventHandler((object a, EventArgs b) =>
+            {
+                if (AppSetting.UserId.Trim() != string.Empty && AppSetting.ApiToken.Trim() != string.Empty)
+                {
+                    UpdateDataFromHabitica();
+                }
+            });
+            timer.Start();
         }
 
         private async void UpdateDataFromHabitica()
@@ -130,7 +149,6 @@ namespace Habitica
                 InitPlanTargetList();
                 ShowMessage("更新数据成功");
                 rotateTransform.BeginAnimation(RotateTransform.AngleProperty, null);
-
             }
             catch (Exception exception)
             {
@@ -152,7 +170,7 @@ namespace Habitica
                 foreach (SimpleTaskCard card in panel.Children)
                 {
                     // 除了已完成且未过期的任务需要保留，其他都清除，重新从 Habitica 上拉取
-                    if (!card.IsFinsh || card.Deadline == null || DateTime.Now.Date > card.Deadline)
+                    if (!card.IsFinsh || card.Deadline == null || DateTime.Now.Date >= card.Deadline)
                     {
                         readyToRemove.Add(card);
                     }
@@ -324,6 +342,8 @@ namespace Habitica
                 string settingPath = dataDir + @"\setting.json";
                 File.WriteAllText(settingPath, settingJson);
                 ShowMessage("保存设置成功", true);
+                // 用户信息修改后更新数据
+                UpdateDataFromHabitica();
             }
             catch (Exception exception)
             {
@@ -343,7 +363,7 @@ namespace Habitica
             return setting;
         }
 
-        bool IsPinned = false;
+        bool IsPinned = true;
         private static readonly BitmapImage pinImage = new BitmapImage(new Uri("Resources/pin.png", UriKind.Relative));
         private static readonly BitmapImage pinOffImage = new BitmapImage(new Uri("Resources/pin-off.png", UriKind.Relative));
         private void PinButton_Click(object sender, MouseButtonEventArgs e)

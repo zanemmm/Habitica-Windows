@@ -13,7 +13,7 @@
         Width="340"
         WindowStartupLocation="CenterScreen" 
         ResizeMode="NoResize" 
-        Loaded="MetroWindow_Loaded" IsMinButtonEnabled="False" IsMaxRestoreButtonEnabled="False" ShowMaxRestoreButton="False" ShowMinButton="False" ShowTitleBar="False" ShowCloseButton="False" Background="#D8FFFFFF" WindowStyle="None" AllowsTransparency="True" ShowActivated="False" ShowSystemMenuOnRightClick="False" ShowDialogsOverTitleBar="False" ShowIconOnTitleBar="False">
+        Loaded="MetroWindow_Loaded" IsMinButtonEnabled="False" IsMaxRestoreButtonEnabled="False" ShowMaxRestoreButton="False" ShowMinButton="False" ShowTitleBar="False" ShowCloseButton="False" Background="#D8FFFFFF" WindowStyle="None" AllowsTransparency="True" ShowActivated="False" ShowSystemMenuOnRightClick="False" ShowDialogsOverTitleBar="False" ShowIconOnTitleBar="False" Icon="Resources/logo.png">
     <Grid>
         <Controls:MetroAnimatedSingleRowTabControl Padding="0 30 0 0" TabStripPlacement="Bottom" Controls:ScrollViewerHelper.IsHorizontalScrollWheelEnabled="False" Background="#00000000">
             <TabItem Padding="15 5" Margin="0" Header="今天">
@@ -110,15 +110,17 @@
         </Controls:MetroAnimatedSingleRowTabControl>
         <Grid x:Name="TitleBar" VerticalAlignment="Top" MouseMove="TitleBar_MouseMove"  Height="30" Background="#CC6459DF">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="30"></ColumnDefinition>
                 <ColumnDefinition Width="*"></ColumnDefinition>
                 <ColumnDefinition Width="30"></ColumnDefinition>
                 <ColumnDefinition Width="30"></ColumnDefinition>
                 <ColumnDefinition Width="30"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <TextBlock Padding="10 0 0 0" Grid.Column="0" FontSize="16" Foreground="White" VerticalAlignment="Center">Habitica</TextBlock>
-            <Image Grid.Column="1" x:Name="RefreshButton" Margin="5" Width="20" Height="20" Source="Resources/refresh.png" Cursor="Hand" MouseLeftButtonUp="Refresh" RenderTransformOrigin="0.5,0.5"></Image>
-            <Image Grid.Column="2" x:Name="PinButton" Margin="5" Width="20" Height="20" Source="Resources/pin-off.png" Cursor="Hand" MouseLeftButtonUp="PinButton_Click"></Image>
-            <Image Grid.Column="3" x:Name="CloseButton" Margin="5" Height="20" Width="20" Source="Resources/close.png" Cursor="Hand" MouseLeftButtonUp="CloseButton_Click"></Image>
+            <Image Grid.Column="0" Margin="2.5 2.4 2.5 2.5" Width="25" Height="25" Source="Resources/logo.png"></Image>
+            <TextBlock Grid.Column="1" Padding="2.5 3 0 0" FontSize="18" Foreground="White" VerticalAlignment="Center" Opacity=".85">Habitica</TextBlock>
+            <Image Grid.Column="2" x:Name="RefreshButton" Margin="5" Width="20" Height="20" Source="Resources/refresh.png" Cursor="Hand" MouseLeftButtonUp="Refresh" RenderTransformOrigin="0.5,0.5"></Image>
+            <Image Grid.Column="3" x:Name="PinButton" Margin="5" Width="20" Height="20" Source="Resources/pin.png" Cursor="Hand" MouseLeftButtonUp="PinButton_Click"></Image>
+            <Image Grid.Column="4" x:Name="CloseButton" Margin="5" Height="20" Width="20" Source="Resources/close.png" Cursor="Hand" MouseLeftButtonUp="CloseButton_Click"></Image>
         </Grid>
         <StackPanel Margin="0 30 0 0" x:Name="MessageBar" Height="32" VerticalAlignment="Top" Opacity="0" Visibility="Collapsed">
             <TextBlock x:Name="MessageBarContent" TextAlignment="Center" FontSize="25" Foreground="White"/>

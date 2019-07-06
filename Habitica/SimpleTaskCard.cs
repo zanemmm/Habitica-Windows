@@ -230,7 +230,7 @@ namespace Habitica
         {
             taskDeadliineBlock.Text = Deadline.ToShortDateString();
             // 没有设置 Deadline 或 DeadLine 未至
-            if (Deadline == null || Deadline == DateTime.MinValue || Deadline.Date >= DateTime.Now.Date)
+            if (Deadline == null || Deadline == DateTime.MinValue || Deadline.Date > DateTime.Now.Date)
             {
                 IsOverdue = false;
                 return;
