@@ -81,7 +81,6 @@ namespace Habitica
             MessageBar.BeginAnimation(OpacityProperty, hiddenAnimation);
         }
 
-        private Timer Timer;
         private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
         {
             // 窗口嵌入桌面
@@ -94,9 +93,13 @@ namespace Habitica
             AppSetting = GetSetting();
             userIdInput.Text = AppSetting.UserId;
             apiTokenInput.Text = AppSetting.ApiToken;
-            if (AppSetting.UserId.Trim() != string.Empty && AppSetting.ApiToken.Trim() != string.Empty)
+            if (HasNotEmptySetting())
             {
                 UpdateDataFromHabitica();
+            }
+            else
+            {
+                settingTab.IsSelected = true;
             }
             // 设置窗口位置
             WindowStartupLocation = WindowStartupLocation.Manual;
@@ -111,7 +114,7 @@ namespace Habitica
             };
             timer.Tick += new EventHandler((object a, EventArgs b) =>
             {
-                if (AppSetting.UserId.Trim() != string.Empty && AppSetting.ApiToken.Trim() != string.Empty)
+                if (HasNotEmptySetting())
                 {
                     UpdateDataFromHabitica();
                 }
@@ -187,7 +190,7 @@ namespace Habitica
 
         private void Refresh(object sender, MouseButtonEventArgs e)
         {
-            if (AppSetting.UserId.Trim() == string.Empty || AppSetting.ApiToken.Trim() == string.Empty)
+            if (!HasNotEmptySetting())
             {
                 ShowMessage("请填写用户信息", false);
                 return;
@@ -225,7 +228,7 @@ namespace Habitica
             List<AppTask> planTargetTasks = HttpApi.PlanTargetTaskFilter(Tasks, TodayTargetTag);
             foreach (AppTask task in planTargetTasks)
             {
-                SimpleTaskCard card = task.ToSimpleTaskCard(false);
+                SimpleTaskCard card = task.ToSimpleTaskCard(true);
                 card.CardRemove += TargetRemoved;
                 card.StatusChange += TargetStatusChange;
                 planTargetsList.Children.Add(card);
@@ -234,6 +237,11 @@ namespace Habitica
 
         private async void AddNewTodayTarget(object sender, RoutedEventArgs e)
         {
+            if (!HasNotEmptySetting())
+            {
+                ShowMessage("请填写用户信息", false);
+                return;
+            }
             newTodayTargetName.Text = newTodayTargetName.Text.Trim();
             if (newTodayTargetName.Text == "")
             {
@@ -258,6 +266,11 @@ namespace Habitica
 
         private async void AddNewDailyTarget(object sender, RoutedEventArgs e)
         {
+            if (!HasNotEmptySetting())
+            {
+                ShowMessage("请填写用户信息", false);
+                return;
+            }
             newDailyTargetName.Text = newDailyTargetName.Text.Trim();
             if (newDailyTargetName.Text == "")
             {
@@ -281,6 +294,11 @@ namespace Habitica
 
         private async void AddNewPlanTarget(object sender, RoutedEventArgs e)
         {
+            if (!HasNotEmptySetting())
+            {
+                ShowMessage("请填写用户信息", false);
+                return;
+            }
             newPlanTargetName.Text = newPlanTargetName.Text.Trim();
             if (newPlanTargetName.Text == "")
             {
@@ -325,6 +343,14 @@ namespace Habitica
             }
         }
 
+        private void ResetFormPosition_Click(object sender, RoutedEventArgs e)
+        {
+            IsPinned = true;
+            PinnedChange();
+            Left = SystemParameters.PrimaryScreenWidth - 288;
+            Top = 0;
+        }
+
         private void SaveSettingButton_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -332,6 +358,7 @@ namespace Habitica
                 if (userIdInput.Text.Trim() == string.Empty || apiTokenInput.Text.Trim() == string.Empty)
                 {
                     ShowMessage("信息不能为空", false);
+                    return;
                 }
                 AppSetting.UserId = userIdInput.Text;
                 AppSetting.ApiToken = apiTokenInput.Text;
@@ -368,6 +395,11 @@ namespace Habitica
 
             Setting setting = JsonConvert.DeserializeObject<Setting>(File.ReadAllText(settingPath));
             return setting;
+        }
+
+        private bool HasNotEmptySetting()
+        {
+            return AppSetting.UserId.Trim() != string.Empty && AppSetting.ApiToken.Trim() != string.Empty;
         }
 
         bool IsPinned = true;

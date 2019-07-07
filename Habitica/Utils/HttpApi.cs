@@ -191,6 +191,10 @@ namespace Habitica.Utils
 
         private List<Model> GetListResponseData<Model>(string json)
         {
+            if (!GetResponseStatus(json))
+            {
+                throw new Exception("请求失败，请检查用户信息");
+            }
             JObject jObject = JObject.Parse(json);
             IList<JToken> data = jObject["data"].Children().ToList();
             List<Model> result = new List<Model>();
@@ -204,6 +208,10 @@ namespace Habitica.Utils
 
         private Model GetObjectResponseData<Model>(string json)
         {
+            if (!GetResponseStatus(json))
+            {
+                throw new Exception("请求失败，请检查用户信息");
+            }
             JObject result = JObject.Parse(json);
             Model data = result["data"].ToObject<Model>();
             return data;

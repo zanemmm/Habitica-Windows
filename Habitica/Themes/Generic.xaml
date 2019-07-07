@@ -8,30 +8,30 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type local:SimpleTaskCard}">
-                    <Border x:Name="taskCard" Margin="5">
+                    <Border x:Name="taskCard" Margin="5 2 5 2">
                         <Border.Effect>
                             <DropShadowEffect ShadowDepth="-4" BlurRadius="5" Color="LightGray"/>
                         </Border.Effect>
                         <Grid Height="80">
-                            <Grid Width="Auto" Height="80">
+                            <Grid Width="Auto" Height="72">
                                 <Grid.RowDefinitions>
-                                    <RowDefinition Height="80"></RowDefinition>
+                                    <RowDefinition Height="72"></RowDefinition>
                                 </Grid.RowDefinitions>
                                 <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="80"></ColumnDefinition>
+                                    <ColumnDefinition Width="72"></ColumnDefinition>
                                     <ColumnDefinition Width="*"></ColumnDefinition>
                                 </Grid.ColumnDefinitions>
                                 <Border x:Name="TaskCheckboxBorder" Grid.Row="0" Grid.Column="0" CornerRadius="8 0 0 8">
-                                    <Image Width="48" Height="48" x:Name="TasKCheckbox" Cursor="Hand"/>
+                                    <Image Width="36" Height="36" x:Name="TasKCheckbox" Cursor="Hand"/>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="1" CornerRadius="0 8 8 0" Background="White">
                                     <StackPanel VerticalAlignment="Center">
-                                        <TextBlock x:Name="taskNameBlock" Padding="15 0 0 0" Text="{TemplateBinding Title}" FontSize="20"/>
+                                        <TextBlock x:Name="taskNameBlock" Padding="15 0 15 0" Text="{TemplateBinding Title}" FontSize="20" TextTrimming="CharacterEllipsis"/>
                                         <TextBlock x:Name="taskDeadliineBlock" Padding="15 10 0 0" FontSize="14" Foreground="{TemplateBinding FinishColor}"></TextBlock>
                                     </StackPanel>
                                 </Border>
                             </Grid>
-                            <Canvas x:Name="clickCanvas" Height="80" ClipToBounds="True">
+                            <Canvas x:Name="clickCanvas" Height="72" ClipToBounds="True">
                                 <Ellipse x:Name="clickEllipseLayer" Width="0" Height="0" Fill="#7FEEEEEE"></Ellipse>
                             </Canvas>
                         </Grid>

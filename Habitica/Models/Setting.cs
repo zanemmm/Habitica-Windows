@@ -11,7 +11,7 @@ namespace Habitica.Models
     {
         public string UserId { get; set; }
         public string ApiToken { get; set; }
-        public Point Position = new Point(SystemParameters.PrimaryScreenWidth - 340, 0);
+        public Point Position = new Point(SystemParameters.PrimaryScreenWidth - 288, 0);
         public bool IsPinned = true;
 
         public Setting(string UserId, string ApiToken)
