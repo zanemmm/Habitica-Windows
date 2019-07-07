@@ -90,10 +90,6 @@ namespace Habitica
             pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SHELLDLL_DefVIew", null);
             pWnd = FindWindowEx(pWnd, IntPtr.Zero, "SysListView32", null);
             SetParent(hWnd, pWnd);
-            // 设置窗口位置
-            WindowStartupLocation = WindowStartupLocation.Manual;
-            Left = SystemParameters.PrimaryScreenWidth - ActualWidth;
-            Top = 0;
             // 获取设置并更新数据
             AppSetting = GetSetting();
             userIdInput.Text = AppSetting.UserId;
@@ -102,6 +98,12 @@ namespace Habitica
             {
                 UpdateDataFromHabitica();
             }
+            // 设置窗口位置
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Left = AppSetting.Position.X;
+            Top = AppSetting.Position.Y;
+            IsPinned = AppSetting.IsPinned;
+            PinnedChange();
             // 每半小时自动更新数据
             DispatcherTimer timer = new DispatcherTimer
             {
@@ -323,24 +325,17 @@ namespace Habitica
             }
         }
 
-        private void SaveSetting(object sender, RoutedEventArgs e)
+        private void SaveSettingButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                string dataDir = Directory.GetCurrentDirectory() + @"\Data";
-                if (!Directory.Exists(dataDir))
-                {
-                    Directory.CreateDirectory(dataDir);
-                }
                 if (userIdInput.Text.Trim() == string.Empty || apiTokenInput.Text.Trim() == string.Empty)
                 {
                     ShowMessage("信息不能为空", false);
                 }
                 AppSetting.UserId = userIdInput.Text;
                 AppSetting.ApiToken = apiTokenInput.Text;
-                string settingJson = JsonConvert.SerializeObject(AppSetting);
-                string settingPath = dataDir + @"\setting.json";
-                File.WriteAllText(settingPath, settingJson);
+                SaveSetting(AppSetting);
                 ShowMessage("保存设置成功", true);
                 // 用户信息修改后更新数据
                 UpdateDataFromHabitica();
@@ -349,6 +344,18 @@ namespace Habitica
             {
                 ShowMessage(exception.ToString(), false);
             }
+        }
+
+        private void SaveSetting(Setting setting)
+        {
+            string dataDir = Directory.GetCurrentDirectory() + @"\Data";
+            if (!Directory.Exists(dataDir))
+            {
+                Directory.CreateDirectory(dataDir);
+            }
+            string settingJson = JsonConvert.SerializeObject(setting);
+            string settingPath = dataDir + @"\setting.json";
+            File.WriteAllText(settingPath, settingJson);
         }
 
         private Setting GetSetting()
@@ -369,6 +376,11 @@ namespace Habitica
         private void PinButton_Click(object sender, MouseButtonEventArgs e)
         {
             IsPinned = !IsPinned;
+            PinnedChange();
+        }
+
+        private void PinnedChange()
+        {
             if (IsPinned)
             {
                 TitleBar.Opacity = .85;
@@ -391,6 +403,10 @@ namespace Habitica
 
         private void CloseButton_Click(object sender, RoutedEventArgs e)
         {
+            AppSetting.Position.X = Left;
+            AppSetting.Position.Y = Top;
+            AppSetting.IsPinned = IsPinned;
+            SaveSetting(AppSetting);
             Close();
         }
     }
