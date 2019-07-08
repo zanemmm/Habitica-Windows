@@ -56,7 +56,7 @@ namespace Habitica
         private static readonly BitmapImage fullImage = new BitmapImage(new Uri("Resources/check-box-outline.png", UriKind.Relative));
         
         // 卡片位移
-        private TranslateTransform moveTranslateTransform = new TranslateTransform(0, 0);
+        private readonly TranslateTransform moveTranslateTransform = new TranslateTransform(0, 0);
 
         // 任务状态类型
         public enum Status

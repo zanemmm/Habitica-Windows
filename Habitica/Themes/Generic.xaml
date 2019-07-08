@@ -22,7 +22,7 @@
                                     <ColumnDefinition Width="*"></ColumnDefinition>
                                 </Grid.ColumnDefinitions>
                                 <Border x:Name="TaskCheckboxBorder" Grid.Row="0" Grid.Column="0" CornerRadius="8 0 0 8">
-                                    <Image Width="36" Height="36" x:Name="TasKCheckbox" Cursor="Hand"/>
+                                    <Image Width="42" Height="42" x:Name="TasKCheckbox" Cursor="Hand"/>
                                 </Border>
                                 <Border Grid.Row="0" Grid.Column="1" CornerRadius="0 8 8 0" Background="White">
                                     <StackPanel VerticalAlignment="Center">

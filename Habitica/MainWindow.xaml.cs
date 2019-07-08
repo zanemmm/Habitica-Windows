@@ -46,9 +46,19 @@ namespace Habitica
         private List<Tag> Tags;
         private Tag TodayTargetTag;
 
+        private readonly DispatcherTimer GCTimer = new DispatcherTimer();
+
         public MainWindow()
         {
             InitializeComponent();
+            GCTimer.Interval = TimeSpan.FromSeconds(30);
+            GCTimer.Tick += new EventHandler((object a, EventArgs b) =>
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                GC.Collect();
+            });
+            GCTimer.Start();
         }
 
         public void ShowMessage(string message, bool isSuccess = true)
